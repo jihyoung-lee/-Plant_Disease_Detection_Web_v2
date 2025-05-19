@@ -15,6 +15,7 @@ use App\Http\Controllers\SearchController;
 |
 */
 Route::get('/disease-info', [SearchController::class, 'infoApi']);
+Route::get('/diseases', [SearchController::class, 'diseaseListApi']);
 Route::get('/cache-test', function () {
     Cache::put('greeting', '안녕, 라라독 Redis!', 10);
 

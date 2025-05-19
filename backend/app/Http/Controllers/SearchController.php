@@ -1,12 +1,53 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class SearchController extends Controller
 {
+    public function diseaseListApi(Request $request)
+    {
+        $searchType = $request->input('type', 1);
+        $search = $request->input('search', '');
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = 10;
+
+        $cacheKey = "disease_list_{$searchType}_{$search}";
+
+        $items = Cache::remember($cacheKey, now()->addHours(6), function () use ($searchType, $search) {
+            $params = [
+                'serviceCode' => 'SVC01',
+                'serviceType' => 'AA001:JSON',
+                'displayCount' => 1000,
+                'startPoint' => 1,
+            ];
+
+            if ($searchType == 1) {
+                $params['cropName'] = $search;
+            } else {
+                $params['sickNameKor'] = $search;
+            }
+
+            $response = $this->callApi($params);
+            return $response['service']['list'] ?? [];
+        });
+
+        $total = count($items);
+        $offset = ($page - 1) * $perPage;
+        $pagedItems = array_slice($items, $offset, $perPage);
+
+        return response()->json([
+            'data' => $pagedItems,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => ceil($total / $perPage),
+            ]
+        ]);
+    }
     public function infoApi(Request $request)
     {
         $cropName = $request->input('cropName');

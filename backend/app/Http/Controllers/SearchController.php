@@ -28,23 +28,6 @@ class SearchController extends Controller
         ]);
     }
 
-    public function getSickKeyApi(Request $request)
-    {
-        $cropName = $request->input('cropName');
-        $sickNameKor = $request->input('sickNameKor');
-
-        try {
-            $sickKey = $this->getSickKey($cropName, $sickNameKor);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'SickKey 조회 실패',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-
-        return response()->json(['sickKey' => $sickKey]);
-    }
-
     protected function callApi(array $params = [])
     {
         $apiKey = config('services.pest.key');

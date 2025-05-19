@@ -1,7 +1,7 @@
 <?php
+namespace App\Http\Controllers\Api;
 
-namespace App\Http\Controllers;
-
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Train;
 use Illuminate\Support\Facades\Http;
@@ -9,21 +9,21 @@ use Illuminate\Support\Facades\Storage;
 
 class PredictController extends Controller
 {
-    public function show()
+    public function index()
     {
         $photos = Train::latest()->paginate(5);
-        return view('list.dashboard', ['Photos' => $photos]);
+        return response()->json($photos);
     }
 
     public function store(Request $request)
     {
         if (!$request->hasFile('photo')) {
-            return redirect()->back()->withErrors(['error' => '사진을 첨부해주세요']);
+            return response()->json(['error' => '사진을 첨부해주세요'], 422);
         }
 
         $modelUrl = env('modelApi');
         if (Http::get($modelUrl)->serverError()) {
-            return redirect()->back()->withErrors(['error' => '서버와의 연결이 끊어졌습니다. 잠시 후에 다시 시도해주세요']);
+            return response()->json(['error' => '서버와의 연결이 끊어졌습니다.'], 503);
         }
 
         [$hashname, $existingTrain, $validatedData] = $this->validateDuplicatePhoto($request);
@@ -35,16 +35,33 @@ class PredictController extends Controller
                 [$cropName, $sickNameKor, $confidence, $path] = $this->fileUpload($modelUrl, $validatedData['photo'], $request);
                 $photo = $this->storePhoto($path, $hashname, $request, $cropName, $sickNameKor, $confidence);
             } catch (\Exception $e) {
-                return redirect()->back()->withErrors(['error' => 'AI 분석 중 오류 발생: ' . $e->getMessage()]);
+                return response()->json(['error' => 'AI 분석 오류: ' . $e->getMessage()], 500);
             }
         }
 
-        return redirect()->back()->with([
-            'id' => $photo->id,
-            'status' => '정상적으로 업로드 되었습니다.'
-        ]);
+        return response()->json([
+            'message' => '업로드 완료',
+            'data' => $photo
+        ], 201);
     }
-    public function fileUpload($modelUrl, $photoFile, Request $request): array
+
+    public function opinionStore(Request $request, $id)
+    {
+        $request->validate([
+            'cropName' => 'required|string',
+            'sickNameKor' => 'required|string',
+        ]);
+
+        $userOpinion = $request->cropName . '_' . $request->sickNameKor;
+
+        $train = Train::findOrFail($id);
+        $train->userOpinion = $userOpinion;
+        $train->save();
+
+        return response()->json(['message' => '의견이 반영되었습니다']);
+    }
+
+    protected function fileUpload($modelUrl, $photoFile, Request $request): array
     {
         $url = $modelUrl . '/predict';
 
@@ -59,11 +76,12 @@ class PredictController extends Controller
         $sickNameKor = $response->json('sickNameKor');
         $confidence = $response->json('confidence');
 
-        $path = $request->file('photo')->store("public/{$cropName}_{$sickNameKor}", 's3');
+        $path = $photoFile->store("public/{$cropName}_{$sickNameKor}", 's3');
 
         return [$cropName, $sickNameKor, $confidence, $path];
     }
-    public function storePhoto($path, $hashname, Request $request, $cropName, $sickNameKor, $confidence)
+
+    protected function storePhoto($path, $hashname, Request $request, $cropName, $sickNameKor, $confidence)
     {
         return Train::create([
             'url' => Storage::disk('s3')->url($path),
@@ -74,7 +92,8 @@ class PredictController extends Controller
             'confidence' => $confidence,
         ]);
     }
-    public function createDataFromExisting($existingTrain, $hashname)
+
+    protected function createDataFromExisting($existingTrain, $hashname)
     {
         return Train::create([
             'url' => $existingTrain->url,
@@ -85,21 +104,8 @@ class PredictController extends Controller
             'confidence' => $existingTrain->confidence,
         ]);
     }
-    public function opinionStore(Request $request, $id)
-    {
-        $cropName = $request->input('cropName');
-        $sickNameKor = $request->input('sickNameKor');
-        $userOpinion = $cropName . '_' . $sickNameKor;
 
-        Train::where('id', $id)->update(['userOpinion' => $userOpinion]);
-
-        return redirect()->back()->with([
-            'status' => '보내주신 의견은 검토 후 모델 재학습에 반영됩니다'
-        ]);
-    }
-
-
-    public function validateDuplicatePhoto(Request $request): array
+    protected function validateDuplicatePhoto(Request $request): array
     {
         $hashname = md5_file($request->file('photo')->getRealPath());
 
@@ -111,5 +117,4 @@ class PredictController extends Controller
 
         return [$hashname, $existingTrain, $validatedData];
     }
-
 }

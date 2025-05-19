@@ -13,7 +13,7 @@ class SearchController extends Controller
         $sickNameKor = $request->input('sickNameKor');
 
         try {
-            $xml = $this->info($cropName, $sickNameKor);
+            $response = $this->info($cropName, $sickNameKor);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'API 호출 실패',
@@ -24,7 +24,7 @@ class SearchController extends Controller
         return response()->json([
             'cropName' => $cropName,
             'sickNameKor' => $sickNameKor,
-            'raw' => json_decode(json_encode($xml), true)
+            'raw' => json_decode(json_encode($response), true)
         ]);
     }
 
@@ -69,14 +69,12 @@ class SearchController extends Controller
             return $json;
         }
 
-        // XML 형태인 경우
-        if (str_starts_with(trim($body), '<')) {
-            return simplexml_load_string($body) ?: throw new \Exception('XML 파싱 실패');
-        }
-
         throw new \Exception("API 응답 형식을 인식할 수 없습니다: " . mb_substr($body, 0, 100));
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function getSickKey(string $cropName, string $sickNameKor): ?string
     {
         $response = $this->callApi([
@@ -87,7 +85,6 @@ class SearchController extends Controller
         ]);
 
         if (
-            !isset($response['service']['list']) ||
             !is_array($response['service']['list']) ||
             empty($response['service']['list'])
         ) {
@@ -101,11 +98,9 @@ class SearchController extends Controller
     {
         $sickKey = $this->getSickKey($cropName, $sickNameKor);
 
-        $xml = $this->callApi([
+        return $this->callApi([
             'serviceCode' => 'SVC05',
             'sickKey' => $sickKey,
         ]);
-
-        return $xml;
     }
 }

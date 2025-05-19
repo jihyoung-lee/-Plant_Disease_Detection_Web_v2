@@ -29,5 +29,9 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'pest' => [
+        'key' => env('API_KEY'),
+        'endpoint' => env('API_URL', 'http://ncpms.rda.go.kr/npmsAPI/service'),
+    ],
 
 ];

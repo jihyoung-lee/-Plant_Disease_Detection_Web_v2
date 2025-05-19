@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\SearchController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Cache;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::get('/disease-info', [SearchController::class, 'infoApi']);
 Route::get('/cache-test', function () {
     Cache::put('greeting', '안녕, 라라독 Redis!', 10);
 

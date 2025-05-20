@@ -1,6 +1,5 @@
 <?php
 
-return [
 
     /*
     |--------------------------------------------------------------------------
@@ -14,12 +13,13 @@ return [
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
     */
+return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['http://localhost:5173'],
 
     'allowed_origins_patterns' => [],
 
@@ -32,3 +32,4 @@ return [
     'supports_credentials' => false,
 
 ];
+

@@ -53,8 +53,19 @@ class SearchController extends Controller
         $cropName = $request->input('cropName');
         $sickNameKor = $request->input('sickNameKor');
 
+        $cacheKey = "disease_info:{$cropName}:{$sickNameKor}";
+
         try {
-            $response = $this->info($cropName, $sickNameKor);
+            $response = Cache::remember($cacheKey, now()->addHours(6), function () use ($cropName, $sickNameKor) {
+                return $this->info($cropName, $sickNameKor);
+            });
+            // Collection이거나 객체일 경우 배열로 확실히 변환
+            if (is_object($response) && method_exists($response, 'toArray')) {
+                $response = $response->toArray();
+            } elseif ($response instanceof \JsonSerializable) {
+                $response = json_decode(json_encode($response), true);
+            }
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'API 호출 실패',

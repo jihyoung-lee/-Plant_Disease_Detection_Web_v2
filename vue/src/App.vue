@@ -1,20 +1,57 @@
 <template>
-  <!-- 가운데 콘텐츠 -->
-    <main class="flex-1 px-4 py-6 relative z-10 max-w-5xl mx-auto w-full">
+  <div class="app-layout">
+    <img :src="bg1" alt="왼쪽 배경" class="left-bg" />
+    <img :src="bg2" alt="오른쪽 배경" class="right-bg" />
+    <div class="content">
       <router-view />
-    </main>
+    </div>
 
+  </div>
+</template>
 
 <script>
-import bg1 from '@/assets/bg.png';
-import bg2 from '@/assets/hero-bg.png';
+import bg1 from '@/assets/bg.png'
+import bg2 from '@/assets/hero-bg.png'
 
 export default {
   data() {
     return {
       bg1,
-      bg2,
-    };
+      bg2
+    }
   },
-};
+}
 </script>
+
+<style scoped>
+.app-layout {
+  display: flex;
+  align-items: flex-start; /* 위쪽 정렬 */
+  justify-content: flex-start; /* 왼쪽 정렬 */
+}
+
+.left-bg {
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+.right-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  opacity: 0.3;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.content {
+  flex: 1;
+  padding: 10px;
+}
+</style>

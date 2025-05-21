@@ -1,5 +1,5 @@
 <template>
-  <div class="box">
+  <div class="w-full px-4 py-8">
     <h2>병해충 도감 검색</h2>
     <div class="search-bar">
       <select v-model="searchType">
@@ -25,9 +25,7 @@
               v-if="item.oriImg"
               :src="item.oriImg"
               alt="이미지"
-              width="100"
-              height="100"
-              loading="lazy"
+              class="table-img"
           />
           <span v-else>-</span>
         </td>
@@ -113,11 +111,7 @@ export default {
 };
 </script>
 <style scoped>
-.box {
-  max-width: 900px;
-  margin: auto;
-  padding: 1rem;
-}
+
 .search-bar {
   display: flex;
   gap: 10px;
@@ -133,16 +127,20 @@ button {
   cursor: pointer;
 }
 table {
-  width: 100%;
+  width: 200%;
   border-collapse: collapse;
+  text-align: center;
+}
+h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
 }
 th,
 td {
   padding: 8px;
   border-bottom: 1px solid #ccc;
-}
-img {
-  border-radius: 4px;
+  min-width: 120px; /* 필요시 더 키워도 돼 */
 }
 .pagination {
   margin-top: 1rem;
@@ -154,5 +152,16 @@ img {
 .pagination .active {
   background-color: #4caf50;
   color: white;
+}
+.mx-auto {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.table-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
 }
 </style>

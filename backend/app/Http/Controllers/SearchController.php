@@ -12,7 +12,7 @@ class SearchController extends Controller
         $searchType = $request->input('type', 1);
         $search = $request->input('search', '');
         $page = max(1, (int) $request->input('page', 1));
-        $perPage = 10;
+        $perPage = 5;
 
         $cacheKey = "disease_list_{$searchType}_{$search}";
 

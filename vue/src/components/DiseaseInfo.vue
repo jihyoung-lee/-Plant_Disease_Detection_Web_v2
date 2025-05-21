@@ -1,23 +1,26 @@
 <template>
-  <div class="box">
+  <div class="content-area">
     <h2>병해충 예방 정보</h2>
     <p v-if="loading">🔄 예방 정보를 불러오는 중입니다...</p>
-    <table v-show="!loading" border="1">
-      <thead>
-      <tr>
-        <th>작물명</th>
-        <th>병명</th>
-        <th>예방 방법</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="(item, index) in services" :key="index">
-        <td>{{ item.cropName }}</td>
-        <td>{{ item.sickNameKor }}</td>
-        <td v-html="formatPrevention(item.preventionMethod)"></td>
-      </tr>
-      </tbody>
-    </table>
+
+    <div class="table-container" v-show="!loading">
+      <table border="1">
+        <thead>
+        <tr>
+          <th>작물명</th>
+          <th>병명</th>
+          <th>예방 방법</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(item, index) in services" :key="index">
+          <td>{{ item.cropName }}</td>
+          <td>{{ item.sickNameKor }}</td>
+          <td v-html="formatPrevention(item.preventionMethod)"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
 
     <p v-if="error" style="color:red;">{{ error }}</p>
   </div>
@@ -49,18 +52,12 @@ export default {
         });
 
         const service = res.data.raw?.service;
-
-        if (!service) {
-          this.error = '결과가 없습니다.';
-        } else {
-          this.services = Array.isArray(service) ? service : [service];
-        }
+        this.services = Array.isArray(service) ? service : [service];
+        if (!service) this.error = '결과가 없습니다.';
       } catch (err) {
-        console.error(err);
-        this.error =
-            'API 요청 실패: ' + (err.response?.data?.error || err.message);
-      }finally {
-        this.loading = false; // 끝나면 로딩 false로 변경
+        this.error = 'API 요청 실패: ' + (err.response?.data?.error || err.message);
+      } finally {
+        this.loading = false;
       }
     },
     formatPrevention(text) {
@@ -72,3 +69,33 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.content-area {
+  width: 100%;
+  padding: 3rem;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  min-width: 800px; /* 이부분 표 크기 */
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+  word-break: break-word;
+}
+</style>

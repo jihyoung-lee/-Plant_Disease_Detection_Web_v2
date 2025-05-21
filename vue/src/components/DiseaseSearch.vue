@@ -9,8 +9,8 @@
       <input v-model="search" placeholder="검색어를 입력하세요" @keyup.enter="fetchData(1)" />
       <button @click="fetchData(1)">🔍 검색</button>
     </div>
-
-    <table v-if="items.length">
+    <p v-if="loading">🔄 예방 정보를 불러오는 중입니다...</p>
+    <table v-show="!loading" border="1">
       <thead>
       <tr>
         <th>사진</th>
@@ -27,6 +27,7 @@
               alt="이미지"
               width="100"
               height="100"
+              loading="lazy"
           />
           <span v-else>-</span>
         </td>
@@ -63,7 +64,7 @@ export default {
   data() {
     return {
       searchType: 1,
-      search: '',
+      search: '사과',
       items: [],
       error: '',
       pagination: {
@@ -72,15 +73,20 @@ export default {
         total: 0,
         last_page: 1,
       },
+      loading: false,
     };
+  },
+  created() {
+    this.fetchData(1); // 첫화면 자동 검색
   },
   methods: {
     async fetchData(page = 1) {
+      this.loading = true;
       this.error = '';
-      this.items = [];
 
       if (!this.search.trim()) {
         this.error = '검색어를 입력해주세요.';
+        this.loading = false;
         return;
       }
 
@@ -99,12 +105,13 @@ export default {
         console.error(err);
         this.error =
             'API 호출 실패: ' + (err.response?.data?.error || err.message);
+      } finally {
+        this.loading = false;
       }
     },
   },
 };
 </script>
-
 <style scoped>
 .box {
   max-width: 900px;

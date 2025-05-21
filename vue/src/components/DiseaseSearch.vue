@@ -1,0 +1,145 @@
+<template>
+  <div class="box">
+    <h2>병해충 도감 검색</h2>
+    <div class="search-bar">
+      <select v-model="searchType">
+        <option :value="1">작물명</option>
+        <option :value="2">병명</option>
+      </select>
+      <input v-model="search" placeholder="검색어를 입력하세요" @keyup.enter="fetchData(1)" />
+      <button @click="fetchData(1)">🔍 검색</button>
+    </div>
+
+    <table v-if="items.length">
+      <thead>
+      <tr>
+        <th>사진</th>
+        <th>작물</th>
+        <th>병</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="(item, index) in items" :key="index">
+        <td>
+          <img
+              v-if="item.imageUrl"
+              :src="item.imageUrl"
+              alt="이미지"
+              width="80"
+          />
+          <span v-else>-</span>
+        </td>
+        <td>{{ item.cropName }}</td>
+        <td>{{ item.sickNameKor }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <p v-if="error" style="color:red;">{{ error }}</p>
+
+    <div class="pagination" v-if="pagination.total > pagination.per_page">
+      <button
+          v-for="n in pagination.last_page"
+          :key="n"
+          :class="{ active: pagination.current_page === n }"
+          @click="fetchData(n)"
+      >
+        {{ n }}
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      searchType: 1,
+      search: '',
+      items: [],
+      error: '',
+      pagination: {
+        current_page: 1,
+        per_page: 10,
+        total: 0,
+        last_page: 1,
+      },
+    };
+  },
+  methods: {
+    async fetchData(page = 1) {
+      this.error = '';
+      this.items = [];
+
+      if (!this.search.trim()) {
+        this.error = '검색어를 입력해주세요.';
+        return;
+      }
+
+      try {
+        const res = await axios.get('http://127.0.0.1/api/diseases', {
+          params: {
+            type: this.searchType,
+            search: this.search,
+            page,
+          },
+        });
+
+        this.items = res.data.data;
+        this.pagination = res.data.pagination;
+      } catch (err) {
+        console.error(err);
+        this.error =
+            'API 호출 실패: ' + (err.response?.data?.error || err.message);
+      }
+    },
+  },
+};
+</script>
+
+<style scoped>
+.box {
+  max-width: 900px;
+  margin: auto;
+  padding: 1rem;
+}
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+input,
+select {
+  padding: 6px;
+  font-size: 1rem;
+}
+button {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+}
+img {
+  border-radius: 4px;
+}
+.pagination {
+  margin-top: 1rem;
+}
+.pagination button {
+  margin-right: 4px;
+  padding: 4px 8px;
+}
+.pagination .active {
+  background-color: #4caf50;
+  color: white;
+}
+</style>

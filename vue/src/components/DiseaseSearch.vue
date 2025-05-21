@@ -7,7 +7,7 @@
         <option :value="2">병명</option>
       </select>
       <input v-model="search" placeholder="검색어를 입력하세요" @keyup.enter="fetchData(1)" />
-      <button @click="fetchData(1)">🔍 검색</button>
+      <button class="search-button" @click="fetchData(1)">🔍 검색</button>
     </div>
     <p v-if="loading">🔄 예방 정보를 불러오는 중입니다...</p>
     <table v-show="!loading" border="1">
@@ -43,7 +43,7 @@
     <p v-if="error" style="color:red;">{{ error }}</p>
 
     <div class="pagination" v-if="pagination.total > pagination.per_page">
-      <button
+      <button class="pagination-button"
           v-for="n in pagination.last_page"
           :key="n"
           :class="{ active: pagination.current_page === n }"
@@ -111,7 +111,11 @@ export default {
 };
 </script>
 <style scoped>
-
+.pagination-button {
+  padding: 4px 8px;
+  min-width: auto;
+  font-size: 0.9rem;
+}
 .search-bar {
   display: flex;
   gap: 10px;
@@ -122,10 +126,12 @@ select {
   padding: 6px;
   font-size: 1rem;
 }
-button {
-  padding: 6px 12px;
+.search-button {
+  min-width: 120px;
+  padding: 12px 12px;
   cursor: pointer;
 }
+
 table {
   width: 200%;
   border-collapse: collapse;
@@ -144,8 +150,9 @@ td {
 }
 .pagination {
   margin-top: 1rem;
+  text-align: center;
 }
-.pagination button {
+.pagination-button {
   margin-right: 4px;
   padding: 4px 8px;
 }

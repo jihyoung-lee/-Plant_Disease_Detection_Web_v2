@@ -15,22 +15,28 @@
       <tr>
         <th>사진</th>
         <th>작물</th>
-        <th>병</th>
+        <th>병명</th>
       </tr>
       </thead>
       <tbody>
       <tr v-for="(item, index) in items" :key="index">
         <td>
           <img
-              v-if="item.imageUrl"
-              :src="item.imageUrl"
+              v-if="item.oriImg"
+              :src="item.oriImg"
               alt="이미지"
-              width="80"
+              width="100"
+              height="100"
           />
           <span v-else>-</span>
         </td>
         <td>{{ item.cropName }}</td>
-        <td>{{ item.sickNameKor }}</td>
+        <td>
+        <router-link
+            :to="`/disease/${encodeURIComponent(item.cropName)}/${encodeURIComponent(item.sickNameKor)}`">
+          {{ item.sickNameKor }}
+        </router-link>
+        </td>
       </tr>
       </tbody>
     </table>

@@ -1,11 +1,6 @@
 <template>
   <div class="box">
     <h2>병해충 예방 정보</h2>
-    <div>
-      <input v-model="cropName" placeholder="작물명 (예: 고추)" />
-      <input v-model="sickNameKor" placeholder="병명 (예: 탄저병)" />
-      <button @click="fetchData">조회하기</button>
-    </div>
 
     <table v-if="services.length" border="1">
       <thead>
@@ -32,12 +27,11 @@
 import axios from 'axios';
 
 export default {
+  props: ['cropName', 'sickNameKor'],
   data() {
     return {
-      cropName: '고추',
-      sickNameKor: '탄저병',
       services: [],
-      error: ''
+      error: '',
     };
   },
   methods: {
@@ -45,11 +39,13 @@ export default {
       this.error = '';
       this.services = [];
 
-      const url = `http://127.0.0.1:80/api/disease-info?cropName=${this.cropName}&sickNameKor=${this.sickNameKor}`;
-
       try {
-        const res = await axios.get(url);
-        console.log(res.data); // 구조 확인용
+        const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
+          params: {
+            cropName: this.cropName,
+            sickNameKor: this.sickNameKor,
+          },
+        });
 
         const service = res.data.raw?.service;
 
@@ -60,37 +56,16 @@ export default {
         }
       } catch (err) {
         console.error(err);
-        this.error = 'API 요청 실패: ' + (err.response?.data?.error || err.message);
+        this.error =
+            'API 요청 실패: ' + (err.response?.data?.error || err.message);
       }
     },
     formatPrevention(text) {
       return text ? text.replace(/\n/g, '<br/>') : '';
-    }
-  }
+    },
+  },
+  created() {
+    this.fetchData();
+  },
 };
 </script>
-
-<style>
-.box {
-  max-width: 800px;
-  margin: auto;
-  padding: 1rem;
-}
-input {
-  margin-right: 8px;
-  padding: 6px;
-}
-button {
-  padding: 6px 12px;
-}
-table {
-  margin-top: 20px;
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  padding: 0.5rem;
-  text-align: left;
-  vertical-align: top;
-}
-</style>

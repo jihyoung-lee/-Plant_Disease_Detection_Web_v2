@@ -2,7 +2,7 @@
 
 laravel 10 , vue 3, s3 , redis
 
-# Crop Disease Search System
+# Plant Disease Search System
 
 This project is a web-based crop disease search system, built with a **fully decoupled architecture**:
 

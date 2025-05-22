@@ -1,7 +1,7 @@
 # -Plant_Disease_Detection_Web_v2
 
 laravel 10 , vue 3, s3 , redis
-
+http://ncpms.rda.go.kr/ 
 # Plant Disease Search System
 
 This project is a web-based crop disease search system, built with a **fully decoupled architecture**:

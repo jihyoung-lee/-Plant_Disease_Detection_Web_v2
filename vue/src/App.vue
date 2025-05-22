@@ -4,23 +4,16 @@
     <img :src="bg2" alt="오른쪽 배경" class="right-bg" />
     <div class="content">
       <router-view />
+      <Footer />
     </div>
 
   </div>
 </template>
 
-<script>
+<script setup>
 import bg1 from '@/assets/bg.png'
 import bg2 from '@/assets/hero-bg.png'
-
-export default {
-  data() {
-    return {
-      bg1,
-      bg2
-    }
-  },
-}
+import Footer from '@/components/Footer.vue'
 </script>
 
 <style scoped>

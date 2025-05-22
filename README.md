@@ -46,7 +46,7 @@ This project is a web-based crop disease search system, built with a **fully dec
 
 ---
 
-## 🥺 Example API Response
+## 🎇 Example API Response
 
 **GET** `/api/diseases?type=1&search=사과&page=1`
 

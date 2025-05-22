@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SearchController extends Controller
 {
@@ -11,16 +11,30 @@ class SearchController extends Controller
     {
         $searchType = $request->input('type', 1);
         $search = $request->input('search', '');
-        $page = max(1, (int) $request->input('page', 1));
+        $page = max(1, (int)$request->input('page', 1));
         $perPage = 5;
 
-        $cacheKey = "disease_list_{$searchType}_{$search}";
+        $encodedSearch = urlencode($search);
+        $cacheKey = "disease_list_{$searchType}_{$encodedSearch}";
+
+        // 로그: 캐시 키 확인
+        Log::info("🧩 요청 들어옴", [
+            'cacheKey' => $cacheKey,
+            'page' => $page,
+            'search' => $search,
+            'searchType' => $searchType
+        ]);
 
         $items = Cache::remember($cacheKey, now()->addHours(6), function () use ($searchType, $search) {
+            Log::info("🌀 캐시 MISS → API 호출 시작", [
+                'searchType' => $searchType,
+                'search' => $search
+            ]);
+
             $params = [
                 'serviceCode' => 'SVC01',
                 'serviceType' => 'AA001:JSON',
-                'displayCount' => 1000,
+                'displayCount' => 100,
                 'startPoint' => 1,
             ];
 
@@ -30,9 +44,19 @@ class SearchController extends Controller
                 $params['sickNameKor'] = $search;
             }
 
-            $response = $this->callApi($params);
+            $response = app()->call([$this, 'callApi'], ['params' => $params]);
+
+            Log::info("✅ API 응답 완료", [
+                '결과수' => count($response['service']['list'] ?? [])
+            ]);
+
             return $response['service']['list'] ?? [];
         });
+
+        Log::info("📦 캐시 HIT 또는 저장됨", [
+            'cacheKey' => $cacheKey,
+            '총개수' => count($items)
+        ]);
 
         $total = count($items);
         $offset = ($page - 1) * $perPage;
@@ -48,12 +72,15 @@ class SearchController extends Controller
             ]
         ]);
     }
+
     public function infoApi(Request $request)
     {
         $cropName = $request->input('cropName');
         $sickNameKor = $request->input('sickNameKor');
 
-        $cacheKey = "disease_info:{$cropName}:{$sickNameKor}";
+        $encodedCropName = urlencode($cropName);
+        $encodedSickNameKro = urlencode($sickNameKor);
+        $cacheKey = "disease_info:{$encodedCropName}:{$encodedSickNameKro}";
 
         try {
             $response = Cache::remember($cacheKey, now()->addHours(6), function () use ($cropName, $sickNameKor) {

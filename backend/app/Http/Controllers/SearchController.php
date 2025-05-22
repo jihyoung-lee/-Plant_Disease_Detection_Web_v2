@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -17,7 +19,6 @@ class SearchController extends Controller
         $encodedSearch = urlencode($search);
         $cacheKey = "disease_list_{$searchType}_{$encodedSearch}";
 
-        // 로그: 캐시 키 확인
         Log::info("🧩 요청 들어옴", [
             'cacheKey' => $cacheKey,
             'page' => $page,
@@ -44,7 +45,7 @@ class SearchController extends Controller
                 $params['sickNameKor'] = $search;
             }
 
-            $response = app()->call([$this, 'callApi'], ['params' => $params]);
+            $response = self::callApi($params);
 
             Log::info("✅ API 응답 완료", [
                 '결과수' => count($response['service']['list'] ?? [])
@@ -84,9 +85,9 @@ class SearchController extends Controller
 
         try {
             $response = Cache::remember($cacheKey, now()->addHours(6), function () use ($cropName, $sickNameKor) {
-                return $this->info($cropName, $sickNameKor);
+                return self::info($cropName, $sickNameKor);
             });
-            // Collection이거나 객체일 경우 배열로 확실히 변환
+
             if (is_object($response) && method_exists($response, 'toArray')) {
                 $response = $response->toArray();
             } elseif ($response instanceof \JsonSerializable) {
@@ -107,7 +108,7 @@ class SearchController extends Controller
         ]);
     }
 
-    protected function callApi(array $params = [])
+    public static function callApi(array $params = [])
     {
         $apiKey = config('services.pest.key');
         $endpoint = config('services.pest.endpoint');
@@ -122,7 +123,6 @@ class SearchController extends Controller
             throw new \Exception("API 호출 실패: {$response->status()}");
         }
 
-        // JSON 형태로 시작하면 json_decode 처리
         if (str_starts_with(trim($body), '{')) {
             $json = json_decode($body, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -134,12 +134,9 @@ class SearchController extends Controller
         throw new \Exception("API 응답 형식을 인식할 수 없습니다: " . mb_substr($body, 0, 100));
     }
 
-    /**
-     * @throws \Exception
-     */
-    protected function getSickKey(string $cropName, string $sickNameKor): ?string
+    public static function getSickKey(string $cropName, string $sickNameKor): ?string
     {
-        $response = $this->callApi([
+        $response = self::callApi([
             'serviceCode' => 'SVC01',
             'serviceType' => 'AA001:JSON',
             'cropName' => $cropName,
@@ -150,17 +147,17 @@ class SearchController extends Controller
             !is_array($response['service']['list']) ||
             empty($response['service']['list'])
         ) {
-            return null; // sickKey 못 찾음
+            return null;
         }
 
         return $response['service']['list'][0]['sickKey'] ?? null;
     }
 
-    public function info($cropName, $sickNameKor)
+    public static function info(string $cropName, string $sickNameKor)
     {
-        $sickKey = $this->getSickKey($cropName, $sickNameKor);
+        $sickKey = self::getSickKey($cropName, $sickNameKor);
 
-        return $this->callApi([
+        return self::callApi([
             'serviceCode' => 'SVC05',
             'sickKey' => $sickKey,
         ]);

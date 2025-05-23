@@ -1,9 +1,6 @@
 <template>
   <div class="content-area">
-    <h2>병해충 예방 정보</h2>
-    <p v-if="loading">🔄 예방 정보를 불러오는 중입니다...</p>
-
-    <div class="table-container" v-show="!loading">
+    <div class="table-container">
       <table border="1">
         <thead>
         <tr>
@@ -12,7 +9,18 @@
           <th>예방 방법</th>
         </tr>
         </thead>
-        <tbody>
+
+        <!-- 로딩 중일 때 -->
+        <tbody v-if="loading">
+        <tr v-for="n in 1" :key="'skeleton-' + n">
+          <td><div class="skeleton-box h-4 w-24"></div></td>
+          <td><div class="skeleton-box h-4 w-32"></div></td>
+          <td><div class="skeleton-box  h-4 w-full"></div></td>
+        </tr>
+        </tbody>
+
+        <!-- 로딩 끝났을 때 -->
+        <tbody v-else>
         <tr v-for="(item, index) in services" :key="index">
           <td>{{ item.cropName }}</td>
           <td>{{ item.sickNameKor }}</td>
@@ -28,6 +36,7 @@
 
 <script>
 import axios from 'axios';
+import { nextTick } from 'vue'
 
 export default {
   props: ['cropName', 'sickNameKor'],
@@ -44,6 +53,9 @@ export default {
       this.error = '';
 
       try {
+        // 스켈레톤 확인용 딜레이
+        await new Promise(resolve => setTimeout(resolve, 800));
+
         const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
           params: {
             cropName: this.cropName,
@@ -64,20 +76,22 @@ export default {
       return text ? text.replace(/\n/g, '<br/>') : '';
     },
   },
-  created() {
-    this.fetchData();
+  mounted() {
+    this.loading = true;
+    nextTick(() => {
+      this.fetchData();
+    });
   },
 };
 </script>
 
 <style scoped>
-.content-area {
-  width: 100%;
-  padding: 3rem;
-  box-sizing: border-box;
-  overflow-x: auto;
+.skeleton-box {
+  background: linear-gradient(90deg, rgba(59, 129, 129, 0.44), rgba(8, 241, 102, 0.44), rgba(28, 197, 114, 0.98));
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
 }
-
 .table-container {
   overflow-x: auto;
 }
@@ -97,5 +111,14 @@ td {
   vertical-align: top;
   white-space: normal;
   word-break: break-word;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 </style>

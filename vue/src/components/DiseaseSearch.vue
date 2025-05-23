@@ -1,19 +1,7 @@
 <template>
-  <div class="w-full px-4 py-8">
-    <h2>병해충 도감 검색</h2>
-    <div class="search-bar">
-      <select v-model="searchType">
-        <option :value="1">작물명</option>
-        <option :value="2">병명</option>
-      </select>
-      <input
-          v-model="search"
-          placeholder="검색어를 입력하세요"
-          @keyup.enter="fetchData(1)"
-      />
-      <button class="search-button" @click="fetchData(1)">🔍 검색</button>
-    </div>
-    <table border="1">
+  <div class="content-area">
+    <h2 class="text-2xl font-semibold mb-4">검색 결과</h2>
+    <table border="1" class="w-full">
       <thead>
       <tr>
         <th>사진</th>
@@ -68,64 +56,75 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import axios from 'axios';
+import { watch, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-export default {
-  name: 'DiseaseSearch',
-  data() {
-    return {
-      searchType: 1,
-      search: '사과',
-      items: [],
-      error: '',
-      pagination: {
-        current_page: 1,
-        per_page: 5, // Laravel과 일치
-        total: 0,
-        last_page: 1,
-      },
-      loading: false,
-    };
-  },
-  created() {
-    this.fetchData(1);
-  },
-  methods: {
-    async fetchData(page = 1) {
-      this.loading = true;
-      this.error = '';
+    const route = useRoute();
+    const router = useRouter();
+
+    const items = ref([]);
+    const error = ref('');
+    const loading = ref(false);
+    const pagination = ref({
+      current_page: 1,
+      per_page: 5,
+      total: 0,
+      last_page: 1,
+    });
+
+    async function fetchData() {
+      const search = route.query.search || '';
+      const type = route.query.type || '1';
+      const page = parseInt(route.query.page || '1', 10);
+
+      if (!search.trim()) {
+        error.value = '검색어를 입력해주세요.';
+        items.value = [];
+        return;
+      }
+
+      loading.value = true;
+      error.value = '';
+
       try {
-        if (!this.search.trim()) {
-          this.error = '검색어를 입력해주세요.';
-          return;
-        }
-
         const res = await axios.get('http://127.0.0.1/api/diseases', {
           params: {
-            type: this.searchType,
-            search: this.search,
+            type,
+            search,
             page,
-          },
+          }
         });
 
-        this.items = res.data.data || [];
-        this.pagination = res.data.pagination || {
+        items.value = res.data.data || [];
+        pagination.value = res.data.pagination || {
           current_page: 1,
           per_page: 5,
           total: 0,
           last_page: 1,
         };
+        pagination.value.current_page = page; // 현재 페이지 명시
       } catch (err) {
-        console.error(err);
-        this.error =
-            'API 호출 실패: ' + (err.response?.data?.error || err.message);
+        error.value = 'API 호출 실패: ' + (err.response?.data?.error || err.message);
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
-  },
-};
+    }
+
+    function goToPage(page) {
+      router.push({
+        path: '/disease-search',
+        query: {
+          ...route.query,
+          page,
+        },
+      });
+    }
+
+    //첫 실행 + 쿼리변경 감지
+    onMounted(fetchData);
+    watch(() => route.query, fetchData);
 </script>
 
 <style scoped>
@@ -134,23 +133,14 @@ export default {
   min-width: auto;
   font-size: 0.9rem;
 }
-.search-bar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 1rem;
-}
 input,
 select {
   padding: 6px;
   font-size: 1rem;
 }
-.search-button {
-  min-width: 120px;
-  padding: 12px 12px;
-  cursor: pointer;
-}
 table {
-  width: 200%;
+  min-width: 800px;
+  width: 100%;
   border-collapse: collapse;
   text-align: center;
 }

@@ -24,13 +24,36 @@
           <td>병명</td>
           <td v-for="item in services">{{ item.sickNameKor }}</td>
         </tr>
-        <tr>
-          <td>예방 방법</td>
-          <td v-for="item in services" v-html="formatPrevention(item.preventionMethod)"></td>
-        </tr>
-
         </tbody>
       </table>
+      <div v-for="(item, index) in services" :key="index">
+        <!-- 증상 -->
+        <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
+          <input type="checkbox" />
+          <div class="collapse-title font-semibold">증상</div>
+          <div class="collapse-content">
+            <p v-html="formatPrevention(item.symptoms)" style="white-space: pre-line"></p>
+          </div>
+        </div>
+
+        <!-- 발생 생태 -->
+        <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
+          <input type="checkbox" />
+          <div class="collapse-title font-semibold">발생 생태</div>
+          <div class="collapse-content">
+            <p v-html="formatPrevention(item.developmentCondition)" style="white-space: pre-line"></p>
+          </div>
+        </div>
+
+        <!-- 방제 방법 -->
+        <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
+          <input type="checkbox" />
+          <div class="collapse-title font-semibold">방제 방법</div>
+          <div class="collapse-content">
+            <p v-html="formatPrevention(item.preventionMethod)"></p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <p v-if="error" style="color:red;">{{ error }}</p>

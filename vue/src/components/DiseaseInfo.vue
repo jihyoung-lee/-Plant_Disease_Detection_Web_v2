@@ -1,31 +1,34 @@
 <template>
   <div class="content-area">
     <div class="table-container">
-      <table border="1">
+      <table>
         <thead>
         <tr>
-          <th>작물명</th>
-          <th>병명</th>
-          <th>예방 방법</th>
+          <td>피해 사진</td>
+          <td v-for="item in services">
+            <img
+                v-if="item.imageList[0].image"
+                :src="item.imageList[0].image"
+                alt="이미지"
+                class="table-img"
+            />
+          </td>
         </tr>
         </thead>
-
-        <!-- 로딩 중일 때 -->
-        <tbody v-if="loading">
-        <tr v-for="n in 1" :key="'skeleton-' + n">
-          <td><div class="skeleton-box h-4 w-24"></div></td>
-          <td><div class="skeleton-box h-4 w-32"></div></td>
-          <td><div class="skeleton-box  h-4 w-full"></div></td>
+        <tbody>
+        <tr>
+          <td>작물명</td>
+          <td v-for="item in services">{{ item.cropName }}</td>
         </tr>
-        </tbody>
-
-        <!-- 로딩 끝났을 때 -->
-        <tbody v-else>
-        <tr v-for="(item, index) in services" :key="index">
-          <td>{{ item.cropName }}</td>
-          <td>{{ item.sickNameKor }}</td>
-          <td v-html="formatPrevention(item.preventionMethod)"></td>
+        <tr>
+          <td>병명</td>
+          <td v-for="item in services">{{ item.sickNameKor }}</td>
         </tr>
+        <tr>
+          <td>예방 방법</td>
+          <td v-for="item in services" v-html="formatPrevention(item.preventionMethod)"></td>
+        </tr>
+
         </tbody>
       </table>
     </div>
@@ -100,7 +103,6 @@ table {
   min-width: 800px; /* 이부분 표 크기 */
   width: 100%;
   table-layout: auto;
-  border-collapse: collapse;
 }
 
 th,
@@ -112,7 +114,11 @@ td {
   white-space: normal;
   word-break: break-word;
 }
-
+table th,
+table td,
+table tr {
+  border: none !important;
+}
 @keyframes shimmer {
   0% {
     background-position: -200% 0;

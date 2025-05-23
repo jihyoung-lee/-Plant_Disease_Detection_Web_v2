@@ -47,8 +47,8 @@
           class="pagination-button"
           v-for="n in pagination.last_page"
           :key="n"
-          :class="{ active: pagination.current_page === n }"
-          @click="fetchData(n)"
+          :class="{ active: String(route.query.page || '1') === String(n) }"
+          @click="goToPage(n)"
       >
         {{ n }}
       </button>
@@ -84,6 +84,7 @@ import { useRoute, useRouter } from 'vue-router';
         items.value = [];
         return;
       }
+      pagination.value.current_page = page;
 
       loading.value = true;
       error.value = '';

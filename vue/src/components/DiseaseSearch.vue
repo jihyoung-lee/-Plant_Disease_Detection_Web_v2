@@ -10,7 +10,7 @@
       </tr>
       </thead>
       <tbody v-if="!loading">
-      <tr v-for="(item, index) in items" :key="index">
+      <tr v-for="(item, index) in items" :key="index" class="hover:bg-green-100 cursor-pointer transition-colors">
         <td>
           <div class="avatar">
           <div class="w-24 rounded">

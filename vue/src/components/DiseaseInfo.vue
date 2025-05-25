@@ -1,5 +1,6 @@
 <template>
-  <div class="content-area">
+  <Loading v-if="loading" />
+  <div v-else class="content-area">
     <div class="table-container">
       <table>
         <thead>
@@ -60,64 +61,64 @@
   </div>
 </template>
 
-<script>
-import axios from 'axios';
-import { nextTick } from 'vue'
+<script setup>
+import { ref, onMounted, nextTick } from 'vue'
+import axios from 'axios'
+import Loading from '@/components/Loading.vue'
+import { useRoute } from 'vue-router'
 
-export default {
-  props: ['cropName', 'sickNameKor'],
-  data() {
-    return {
-      services: [],
-      error: '',
-      loading: false,
-    };
-  },
-  methods: {
-    async fetchData() {
-      this.loading = true;
-      this.error = '';
+// props
+const props = defineProps({
+  cropName: String,
+  sickNameKor: String
+})
 
-      try {
-        // 스켈레톤 확인용 딜레이
-        await new Promise(resolve => setTimeout(resolve, 800));
+// 상태
+const services = ref([])
+const error = ref('')
+const loading = ref(false)
 
-        const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
-          params: {
-            cropName: this.cropName,
-            sickNameKor: this.sickNameKor,
-          },
-        });
+// 줄바꿈 <br/> 변환 함수
+function formatPrevention(text) {
+  return text ? text.replace(/\n/g, '<br/>') : ''
+}
 
-        const service = res.data.raw?.service;
-        this.services = Array.isArray(service) ? service : [service];
-        if (!service) this.error = '결과가 없습니다.';
-      } catch (err) {
-        this.error = 'API 요청 실패: ' + (err.response?.data?.error || err.message);
-      } finally {
-        this.loading = false;
-      }
-    },
-    formatPrevention(text) {
-      return text ? text.replace(/\n/g, '<br/>') : '';
-    },
-  },
-  mounted() {
-    this.loading = true;
-    nextTick(() => {
-      this.fetchData();
-    });
-  },
-};
+// 데이터 요청
+async function fetchData() {
+  loading.value = true
+  error.value = ''
+
+  try {
+    // 스켈레톤 테스트용 지연
+    await new Promise(resolve => setTimeout(resolve, 800))
+
+    const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
+      params: {
+        cropName: props.cropName,
+        sickNameKor: props.sickNameKor,
+      },
+    })
+
+    const service = res.data.raw?.service
+    services.value = Array.isArray(service) ? service : [service]
+
+    if (!service) error.value = '결과가 없습니다.'
+  } catch (err) {
+    error.value = 'API 요청 실패: ' + (err.response?.data?.error || err.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 마운트 시 호출
+onMounted(() => {
+  loading.value = true
+  nextTick(fetchData)
+})
 </script>
 
+
 <style scoped>
-.skeleton-box {
-  background: linear-gradient(90deg, rgba(59, 129, 129, 0.44), rgba(8, 241, 102, 0.44), rgba(28, 197, 114, 0.98));
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 4px;
-}
 .table-container {
   overflow-x: auto;
 }

@@ -24,11 +24,13 @@ import Navbar from "@/components/navbar.vue";
   display: flex;
   align-items: flex-start; /* 위쪽 정렬 */
   justify-content: center;
+  width: 50vw;
+  height: 100vh;
 }
 
 .left-bg {
   display: block;
-  width: auto;
+  width: 300px;
   height: auto;
   margin: 0;
   padding: 0;
@@ -37,7 +39,7 @@ import Navbar from "@/components/navbar.vue";
   position: absolute;
   top: 0;
   right: 0;
-  width: 30%;
+  width: 300px;
   height: auto;
   margin: 0;
   padding: 0;
@@ -47,10 +49,10 @@ import Navbar from "@/components/navbar.vue";
 }
 
 .content {
-  flex: 1;
-  padding: 10px;
   width: 100%;
-  max-width: 1400px;
+  height: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 .content-area {
   width: 100%;

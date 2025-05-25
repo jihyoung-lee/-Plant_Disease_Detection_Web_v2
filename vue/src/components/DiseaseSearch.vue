@@ -12,13 +12,18 @@
       <tbody v-if="!loading">
       <tr v-for="(item, index) in items" :key="index">
         <td>
+          <div class="avatar">
+          <div class="w-24 rounded">
           <img
               v-if="item.oriImg"
               :src="item.oriImg"
               alt="이미지"
               class="table-img"
           />
+
           <span v-else>-</span>
+          </div>
+          </div>
         </td>
         <td>{{ item.cropName }}</td>
         <td>

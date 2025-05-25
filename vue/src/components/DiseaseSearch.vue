@@ -18,7 +18,7 @@
               v-if="item.oriImg"
               :src="item.oriImg"
               alt="이미지"
-              class="table-img"
+              class="w-[100px] h-[100px] object-contain"
           />
 
           <span v-else>-</span>
@@ -168,13 +168,6 @@ td {
 .pagination .active {
   background-color: #4caf50;
   color: white;
-}
-.table-img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  display: block;
-  margin: 0 auto;
 }
 .skeleton-box {
   background: linear-gradient(90deg, rgba(59, 129, 129, 0.44), rgba(8, 241, 102, 0.44), rgba(28, 197, 114, 0.98));

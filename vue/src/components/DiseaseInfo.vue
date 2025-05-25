@@ -11,7 +11,7 @@
                 v-if="item.imageList[0].image"
                 :src="item.imageList[0].image"
                 alt="이미지"
-                class="table-img"
+                class="w-[300px] h-[300px] object-contain"
             />
           </td>
         </tr>

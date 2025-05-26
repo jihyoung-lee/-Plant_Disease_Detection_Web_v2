@@ -8,6 +8,7 @@
 <div class="flex-1">
   <a class="btn btn-ghost text-xl"> {{ route.meta.title || '병해충 AI' }}</a>
 </div>
+  <modal />
   <div class="flex-none">
     <SearchInput />
   </div>
@@ -17,6 +18,7 @@
 import logo from '@/assets/farmer.svg'
 import { useRoute } from 'vue-router'
 import SearchInput from "@/components/searchInput.vue";
+import Modal from "@/components/modal.vue";
 
 const route = useRoute()
 </script>

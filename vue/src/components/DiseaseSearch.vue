@@ -48,8 +48,9 @@
     <p v-if="error" style="color:red;">{{ error }}</p>
 
     <div class="pagination" v-if="pagination && pagination.total > pagination.per_page">
+      <div class="join">
       <button
-          class="pagination-button"
+          class="join-item btn"
           v-for="n in pagination.last_page"
           :key="n"
           :class="{ active: String(route.query.page || '1') === String(n) }"
@@ -58,6 +59,7 @@
         {{ n }}
       </button>
     </div>
+  </div>
   </div>
 </template>
 
@@ -134,11 +136,6 @@ import { useRoute, useRouter } from 'vue-router';
 </script>
 
 <style scoped>
-.pagination-button {
-  padding: 4px 8px;
-  min-width: auto;
-  font-size: 0.9rem;
-}
 input,
 select {
   padding: 6px;

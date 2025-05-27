@@ -17,12 +17,12 @@ class PredictController extends Controller
 
     public function store(Request $request)
     {
-        if (!$request->hasFile('photo')) {
+        if (!$request->hasFile('image')) {
             return response()->json(['error' => '사진을 첨부해주세요'], 422);
         }
 
-        $modelUrl = env('modelApi');
-        if (Http::get($modelUrl)->serverError()) {
+        $modelUrl = config('services.predict.endpoint');;
+        if (Http::post($modelUrl)->serverError()) {
             return response()->json(['error' => '서버와의 연결이 끊어졌습니다.'], 503);
         }
 
@@ -32,7 +32,7 @@ class PredictController extends Controller
             $photo = $this->createDataFromExisting($existingTrain, $hashname);
         } else {
             try {
-                [$cropName, $sickNameKor, $confidence, $path] = $this->fileUpload($modelUrl, $validatedData['photo'], $request);
+                [$cropName, $sickNameKor, $confidence, $path] = $this->fileUpload($modelUrl, $validatedData['image'], $request);
                 $photo = $this->storePhoto($path, $hashname, $request, $cropName, $sickNameKor, $confidence);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'AI 분석 오류: ' . $e->getMessage()], 500);
@@ -63,7 +63,8 @@ class PredictController extends Controller
 
     protected function fileUpload($modelUrl, $photoFile, Request $request): array
     {
-        $url = $modelUrl . '/predict';
+        $url = $modelUrl;
+
 
         $response = Http::attach('image', file_get_contents($photoFile), $photoFile->getClientOriginalName())
             ->post($url);
@@ -72,21 +73,23 @@ class PredictController extends Controller
             throw new \Exception("API 응답 오류");
         }
 
-        $cropName = $response->json('cropName');
-        $sickNameKor = $response->json('sickNameKor');
-        $confidence = $response->json('confidence');
+        $cropName = $response->json('cropName') ?: 'unknown';
+        $sickNameKor = $response->json('sickNameKor') ?: 'unknown';
+        $confidence = $response->json('confidence') ?: 0;
 
-        $path = $photoFile->store("public/{$cropName}_{$sickNameKor}", 's3');
 
+        #$path = $photoFile->store("public/{$cropName}_{$sickNameKor}", 's3');
+        $path = 'test';
         return [$cropName, $sickNameKor, $confidence, $path];
     }
 
     protected function storePhoto($path, $hashname, Request $request, $cropName, $sickNameKor, $confidence)
     {
         return Train::create([
-            'url' => Storage::disk('s3')->url($path),
+            #'url' => Storage::disk('s3')->url($path),
+            'url' => 'test',
             'hashname' => $hashname,
-            'originalname' => $request->file('photo')->getClientOriginalName(),
+            'originalname' => $request->file('image')->getClientOriginalName(),
             'cropName' => $cropName,
             'sickNameKor' => $sickNameKor,
             'confidence' => $confidence,
@@ -107,12 +110,12 @@ class PredictController extends Controller
 
     protected function validateDuplicatePhoto(Request $request): array
     {
-        $hashname = md5_file($request->file('photo')->getRealPath());
+        $hashname = md5_file($request->file('image')->getRealPath());
 
         $existingTrain = Train::where('hashname', $hashname)->latest()->first();
 
         $validatedData = $request->validate([
-            'photo' => 'required|mimes:jpeg,bmp,png,jpg'
+            'image' => 'required|mimes:jpeg,bmp,png,jpg'
         ]);
 
         return [$hashname, $existingTrain, $validatedData];

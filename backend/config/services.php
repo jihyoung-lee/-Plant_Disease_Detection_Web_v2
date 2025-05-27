@@ -33,5 +33,8 @@ return [
         'key' => env('RDA_API_KEY'),
         'endpoint' => env('API_URL', 'http://ncpms.rda.go.kr/npmsAPI/service'),
     ],
+    'predict' => [
+        'endpoint' => env('PREDICT_URL', 'http://127.0.0.1:5000/predict'),
+    ]
 
 ];

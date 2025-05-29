@@ -13,35 +13,37 @@
       <p class="py-4">
         <input type="file" class="file-input file-input-success" @change="onFileChange" />
       </p>
+      <!-- 로딩 표시 -->
+      <div v-if="loading" class="flex justify-center items-center py-4">
+        <span class="loading loading-spinner text-accent loading-lg"></span>
+        <span class="ml-2 text-accent font-semibold">AI 분석 중...</span>
+      </div>
 
-      <!-- 결과 표시 -->
-      <div v-if="services.length > 0">
-        <div v-for="item in services" :key="item.cropName">
+      <!-- 에러 표시 -->
+      <p v-if="error" class="text-red-500 text-center">{{ error }}</p>
 
-
-      <p v-if="error">{{ error }}</p>
-
-
-      <div class="card bg-base-100 w-96 shadow-sm">
-        <figure>
-          <img v-if="previewUrl" :src="previewUrl" alt="Uploaded Image" />
-        </figure>
-        <div class="card-body text-center items-center justify-center">
-          <h2 class="card-title">
-            {{ item.sickNameKor }}
-            <div class="badge badge-secondary">{{ item.cropName }}</div>
-          </h2>
-          <div
-              class="radial-progress text-success"
-              :style="{ '--value': item.confidence }"
-              :aria-valuenow="item.confidence"
-              role="progressbar"
-          >
-            {{ item.confidence }}%
+      <!-- 결과 카드 표시 -->
+      <div v-if="!loading && services.length > 0">
+        <div v-for="item in services" :key="item.cropName" class="card bg-base-100 w-96 shadow-sm mx-auto my-4">
+          <figure>
+            <img v-if="previewUrl" :src="previewUrl" alt="Uploaded Image" />
+          </figure>
+          <div class="card-body text-center items-center justify-center">
+            <h2 class="card-title">
+              <a v-if="item.link" :href="item.link" class="text-green-400 underline">{{ item.sickNameKor }}</a>
+              <span v-else>{{ item.sickNameKor }}</span>
+              <div class="badge badge-secondary">{{ item.cropName }}</div>
+            </h2>
+            <div
+                class="radial-progress text-success"
+                :style="{ '--value': item.confidence }"
+                :aria-valuenow="item.confidence"
+                role="progressbar"
+            >
+              {{ item.confidence }}%
+            </div>
           </div>
         </div>
-      </div>
-    </div>
       </div>
       <button class="btn btn-outline btn-success" @click="fetchData">진단</button>
     </div>
@@ -89,12 +91,28 @@ async function fetchData() {
     services.value = [{
       cropName: data.cropName,
       sickNameKor: data.sickNameKor,
-      confidence: data.confidence
+      confidence: data.confidence,
+      link: null
     }]
+    await fetchDiseaseInfo(services.value[0]) //도감 조회
   } catch (err) {
     error.value = 'API 요청 실패: ' + (err.response?.data?.error || err.message)
   } finally {
     loading.value = false
+  }
+}
+async function fetchDiseaseInfo(item) {
+  try {
+    const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
+      params: { cropName: item.cropName, sickNameKor: item.sickNameKor }
+    });
+    if (res.data) {
+      item.link = `/disease/${encodeURIComponent(item.cropName)}/${encodeURIComponent(item.sickNameKor)}`;
+    } else {
+      item.link = null;
+    }
+  } catch (err) {
+    item.link = null;
   }
 }
 </script>

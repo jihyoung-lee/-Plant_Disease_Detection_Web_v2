@@ -16,13 +16,33 @@
 
       <!-- 결과 표시 -->
       <div v-if="services.length > 0">
-        <p v-for="item in services" :key="item.cropName">
-          <strong>작물명:</strong> {{ item.cropName }} / <strong>병명:</strong> {{ item.sickNameKor }} / <strong>정확도:</strong> {{ item.confidence }}
-        </p>
-      </div>
+        <div v-for="item in services" :key="item.cropName">
+
 
       <p v-if="error">{{ error }}</p>
 
+
+      <div class="card bg-base-100 w-96 shadow-sm">
+        <figure>
+          <img v-if="previewUrl" :src="previewUrl" alt="Uploaded Image" />
+        </figure>
+        <div class="card-body text-center items-center justify-center">
+          <h2 class="card-title">
+            {{ item.sickNameKor }}
+            <div class="badge badge-secondary">{{ item.cropName }}</div>
+          </h2>
+          <div
+              class="radial-progress text-success"
+              :style="{ '--value': item.confidence }"
+              :aria-valuenow="item.confidence"
+              role="progressbar"
+          >
+            {{ item.confidence }}%
+          </div>
+        </div>
+      </div>
+    </div>
+      </div>
       <button class="btn btn-outline btn-success" @click="fetchData">진단</button>
     </div>
   </dialog>
@@ -37,10 +57,12 @@ const services = ref([])
 const error = ref('')
 const loading = ref(false)
 const photo = ref(null) // 선택된 파일 저장
+const previewUrl = ref(null)
 
 // 파일 선택 핸들러
 function onFileChange(event) {
   photo.value = event.target.files[0]
+  previewUrl.value = URL.createObjectURL(photo.value)
 }
 
 // 데이터 요청

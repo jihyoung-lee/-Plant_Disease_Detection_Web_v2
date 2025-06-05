@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Api\ResultController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,6 +30,10 @@ Route::get('/cache-test', function () {
         'value' => Cache::get('greeting'),
     ];
 });
+
+Route::get('/results', [ResultController::class, 'index']);
+Route::get('/results/{id}', [ResultController::class, 'show']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

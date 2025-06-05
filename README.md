@@ -1,5 +1,7 @@
 # -Plant_Disease_Detection_Web_v2
-
+![Image](https://github.com/user-attachments/assets/0ef5a30c-204a-4389-8d92-5438ab63dce2)
+![Image](https://github.com/user-attachments/assets/1d28c5a5-36ca-4e0b-ae1a-c2bed772a073)
+![Image](https://github.com/user-attachments/assets/7b1c3842-7331-4e4a-835a-396586ed9132)
 laravel 10 , vue 3, s3 , redis
 http://ncpms.rda.go.kr/ 
 # Plant Disease Search System

@@ -8,11 +8,24 @@
       </form>
 
       <h3 class="text-lg font-bold">AI 병해 진단 서비스</h3>
+      <!-- 작물 선택 & 파일 선택: 정돈-->
+      <div class="flex flex-col gap-4 items-center py-4">
+        <!-- 작물 선택 -->
+        <div class="w-80">
+          <label for="crop-select" class="block font-semibold mb-1">작물 선택</label>
+          <select id="crop-select" class="select select-bordered w-full"
+                  v-model="selectedCrop">
+            <option disabled value="">작물을 선택하세요</option>
+            <option v-for="crop in cropOptions" :key="crop" :value="crop">{{ crop }}</option>
+          </select>
+        </div>
 
-      <!-- 파일 선택 -->
-      <p class="py-4">
-        <input type="file" class="file-input file-input-success" @change="onFileChange" />
-      </p>
+        <!-- 파일 선택 -->
+        <div class="w-80">
+          <label class="block font-semibold mb-1">이미지 업로드</label>
+          <input type="file" class="file-input file-input-success w-full" @change="onFileChange" />
+        </div>
+      </div>
       <!-- 로딩 표시 -->
       <div v-if="loading" class="flex justify-center items-center py-4">
         <span class="loading loading-spinner text-accent loading-lg"></span>
@@ -60,7 +73,8 @@ const error = ref('')
 const loading = ref(false)
 const photo = ref(null) // 선택된 파일 저장
 const previewUrl = ref(null)
-
+const selectedCrop = ref('') // 작물 선택값
+const cropOptions = ref(['감자', '딸기', '토마토', '복숭아', '후추', '체리','블루베리','옥수수','포도']) // 필요 시 더 추가 가능
 // 파일 선택 핸들러
 function onFileChange(event) {
   photo.value = event.target.files[0]
@@ -69,6 +83,11 @@ function onFileChange(event) {
 
 // 데이터 요청
 async function fetchData() {
+  if (!selectedCrop.value) {
+    error.value = '작물을 선택해주세요.'
+    return
+  }
+
   if (!photo.value) {
     error.value = '이미지를 선택해주세요.'
     return
@@ -81,6 +100,7 @@ async function fetchData() {
   try {
     const formData = new FormData()
     formData.append('image', photo.value)
+    formData.append('cropName', selectedCrop.value)
 
     const res = await axios.post(`http://127.0.0.1/api/predict`, formData, {
       headers: {

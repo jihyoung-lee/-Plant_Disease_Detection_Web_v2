@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import DiseaseSearch from '@/components/DiseaseSearch.vue';
 import DiseaseDetail from '../components/DiseaseInfo.vue';
+import TrainList from '../components/TrainList.vue'
 const routes = [
     {
         path: '/',
@@ -20,6 +21,12 @@ const routes = [
         name: 'DiseaseSearch',
         meta: { title: '병해충 도감 검색' },
         component: DiseaseSearch,
+    },
+    {
+        path: '/list',
+        name: 'TrainList',
+        meta: { title: '병해충 판별 결과' },
+        component: TrainList,
     },
 ];
 

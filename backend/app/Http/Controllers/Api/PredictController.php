@@ -65,9 +65,16 @@ class PredictController extends Controller
     {
         $url = $modelUrl;
 
+        $cropName = $request->input('cropName');
 
-        $response = Http::attach('image', file_get_contents($photoFile), $photoFile->getClientOriginalName())
-            ->post($url);
+        // 이미지와 crop 파라미터 함께 전송
+        $response = Http::attach(
+            'image',
+            file_get_contents($photoFile),
+            $photoFile->getClientOriginalName()
+        )->post($url, [
+            'cropName' => $cropName
+        ]);
 
         if ($response->failed()) {
             throw new \Exception("API 응답 오류");

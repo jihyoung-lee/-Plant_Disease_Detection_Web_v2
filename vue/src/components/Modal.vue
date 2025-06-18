@@ -43,8 +43,12 @@
           </figure>
           <div class="card-body text-center items-center justify-center">
             <h2 class="card-title">
-              <a v-if="item.link" :href="item.link" class="text-green-400 underline">{{ item.sickNameKor }}</a>
-              <span v-else>{{ item.sickNameKor }}</span>
+              <a v-if="item.link" :href="item.link" class="text-green-400 underline">
+                {{ item.sickNameKor }}
+              </a>
+              <span v-else>
+  {{ item.sickNameKor }}
+</span>
               <div class="badge badge-secondary">{{ item.cropName }}</div>
             </h2>
             <div
@@ -67,14 +71,13 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
-// 상태
 const services = ref([])
 const error = ref('')
 const loading = ref(false)
-const photo = ref(null) // 선택된 파일 저장
+const photo = ref(null)
 const previewUrl = ref(null)
-const selectedCrop = ref('') // 작물 선택값
-const cropOptions =ref([
+const selectedCrop = ref('')
+const cropOptions = ref([
   { label: '감자', value: 'potato' },
   { label: '딸기', value: 'strawberry' },
   { label: '토마토', value: 'tomato' },
@@ -86,13 +89,32 @@ const cropOptions =ref([
   { label: '포도', value: 'grape' }
 ])
 
-// 파일 선택 핸들러
 function onFileChange(event) {
   photo.value = event.target.files[0]
   previewUrl.value = URL.createObjectURL(photo.value)
 }
 
-// 데이터 요청
+// 도감 링크 조회 함수
+async function fetchDiseaseInfo(item) {
+  try {
+    const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
+      params: {
+        cropName: item.cropName,
+        sickNameKor: item.sickNameKor,
+      }
+    })
+
+    if (res.data && Object.keys(res.data).length > 0) {
+      item.link = `/disease/${encodeURIComponent(item.cropName)}/${encodeURIComponent(item.sickNameKor)}`
+    } else {
+      item.link = null
+    }
+  } catch {
+    item.link = null
+  }
+}
+
+// 데이터 요청 함수
 async function fetchData() {
   if (!selectedCrop.value) {
     error.value = '작물을 선택해주세요.'
@@ -106,7 +128,7 @@ async function fetchData() {
 
   loading.value = true
   error.value = ''
-  services.value = [] // 이전 결과 초기화
+  services.value = []
 
   try {
     const formData = new FormData()
@@ -118,32 +140,32 @@ async function fetchData() {
         'Content-Type': 'multipart/form-data',
       },
     })
+
     const data = res.data.data
-    services.value = [{
+
+    const serviceItem = {
       cropName: data.cropName,
       sickNameKor: data.sickNameKor,
       confidence: data.confidence,
-      link: null
-    }]
-    await fetchDiseaseInfo(services.value[0]) //도감 조회
+      link: null,
+    }
+
+    if (
+        res.data &&
+        res.data.raw &&
+        res.data.raw.service &&
+        res.data.raw.service.errorCode === 'ERR_201'
+    ) {
+      item.link = null
+    } else if (res.data && Object.keys(res.data).length > 0) {
+      item.link = `/disease/${encodeURIComponent(item.cropName)}/${encodeURIComponent(item.sickNameKor)}`
+    } else {
+      item.link = null
+    }
   } catch (err) {
     error.value = 'API 요청 실패: ' + (err.response?.data?.error || err.message)
   } finally {
     loading.value = false
-  }
-}
-async function fetchDiseaseInfo(item) {
-  try {
-    const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
-      params: { cropName: item.cropName, sickNameKor: item.sickNameKor }
-    });
-    if (res.data) {
-      item.link = `/disease/${encodeURIComponent(item.cropName)}/${encodeURIComponent(item.sickNameKor)}`;
-    } else {
-      item.link = null;
-    }
-  } catch (err) {
-    item.link = null;
   }
 }
 </script>

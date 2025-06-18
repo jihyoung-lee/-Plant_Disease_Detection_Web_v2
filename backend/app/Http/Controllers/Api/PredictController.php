@@ -27,7 +27,6 @@ class PredictController extends Controller
       /*  if (Http::post($modelUrl)->serverError()) {
             return response()->json(['error' => '서버와의 연결이 끊어졌습니다.'], 503);
         }*/
-
         [$hashname, $existingTrain, $validatedData] = $this->validateDuplicatePhoto($request);
 
         if ($existingTrain) {

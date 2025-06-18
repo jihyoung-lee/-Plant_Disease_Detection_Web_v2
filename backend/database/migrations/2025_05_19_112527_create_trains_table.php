@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('trains', function (Blueprint $table) {
             $table->id();
             $table->string('url');
-            $table->string('hashname')->index();
+            $table->string('hashname')->nullable();
             $table->string('originalname');
             $table->string('cropName');
             $table->string('sickNameKor');

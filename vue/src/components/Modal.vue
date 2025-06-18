@@ -156,16 +156,18 @@ async function fetchData() {
         res.data.raw.service &&
         res.data.raw.service.errorCode === 'ERR_201'
     ) {
-      item.link = null
-    } else if (res.data && Object.keys(res.data).length > 0) {
-      item.link = `/disease/${encodeURIComponent(item.cropName)}/${encodeURIComponent(item.sickNameKor)}`
+      serviceItem.link = null
     } else {
-      item.link = null
+      serviceItem.link = `/disease/${encodeURIComponent(serviceItem.cropName)}/${encodeURIComponent(serviceItem.sickNameKor)}`
     }
+
+    services.value.push(serviceItem)
+
   } catch (err) {
     error.value = 'API 요청 실패: ' + (err.response?.data?.error || err.message)
   } finally {
     loading.value = false
   }
 }
+
 </script>

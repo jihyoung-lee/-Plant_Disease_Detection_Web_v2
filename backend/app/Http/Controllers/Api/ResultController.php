@@ -29,10 +29,9 @@ class ResultController extends Controller
             return response()->json(['error' => '사진을 찾을 수 없습니다'], 404);
         }
 
-        if(Storage::disk('public')->exists($photo->url)) {
-            Storage::disk('public')->delete($photo->url);
+        if(Storage::disk('public')->exists('images/' . $photo->url)) {
+            Storage::disk('public')->delete('images/' . $photo->url);
         }
-
         //DB delete
         $photo->delete();
 

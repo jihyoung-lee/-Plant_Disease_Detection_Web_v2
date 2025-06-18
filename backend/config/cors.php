@@ -15,7 +15,8 @@
     */
 return [
 
-    'paths' => ['api/*', 'login', 'logout', 'sanctum/csrf-cookie', 'email/*'],
+    // 추가: 회원가입 API 호출을 위한 '/register' 경로 허용
+    'paths' => ['api/*', 'login', 'logout', 'register', 'sanctum/csrf-cookie', 'email/*'],
 
     'allowed_methods' => ['*'],
 

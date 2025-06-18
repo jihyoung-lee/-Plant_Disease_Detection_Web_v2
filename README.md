@@ -1,7 +1,7 @@
 # -Plant_Disease_Detection_Web_v2
 ![Image](https://github.com/user-attachments/assets/0ef5a30c-204a-4389-8d92-5438ab63dce2)
 ![image](https://github.com/user-attachments/assets/dc8fc5ff-6484-4f5c-a57c-b4eaebdcf940)
-![image](https://github.com/user-attachments/assets/3f7111f0-d1da-4e11-baa5-40b8dd89296e)
+![image](https://github.com/user-attachments/assets/88d1ba08-dd6c-4e1e-b962-e45231dd07d8)
 ![image](https://github.com/user-attachments/assets/dc220cce-afd7-4b4a-a877-7d8b24577a37)
 
 laravel 10 , vue 3, s3 , redis

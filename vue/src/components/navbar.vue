@@ -12,6 +12,7 @@
   <div class="flex-none">
     <SearchInput />
   </div>
+  <router-link to="/register" class="btn">회원가입</router-link>
 </div>
 </template>
 <script setup>

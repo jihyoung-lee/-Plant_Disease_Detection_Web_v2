@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Api\ResultController;
+use App\Http\Controllers\Auth\RegisterController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -16,6 +18,23 @@ use App\Http\Controllers\Api\ResultController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::post('/register', [RegisterController::class, 'register']);
+// 인증 요청 메일 보내기
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return response()->json(['message' => '이메일 인증 메일을 보냈어요.']);
+})->middleware(['auth:sanctum']);
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::get('/results', [resultController::class, 'index']);
+    Route::get('/results/{id}', [ResultController::class, 'show']);
+    Route::delete('/results/{id}', [ResultController::class, 'destroy']);
+});
+// 인증 링크 클릭했을 때
+Route::get('/verify-email/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill(); // 인증 완료 처리
+    return redirect('/verified-success'); // 프론트 페이지로 리디렉션
+
+})->middleware(['signed'])->name('verification.verify');
 Route::prefix('predict')->group(function () {
     Route::get('/', [PredictController::class, 'index']);
     Route::post('/', [PredictController::class, 'store']);
@@ -32,9 +51,8 @@ Route::get('/cache-test', function () {
     ];
 });
 
-Route::get('/results', [ResultController::class, 'index']);
-Route::get('/results/{id}', [ResultController::class, 'show']);
-Route::delete('/results/{id}', [ResultController::class, 'destroy']);
+
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

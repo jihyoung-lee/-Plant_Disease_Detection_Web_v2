@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import DiseaseSearch from '@/components/DiseaseSearch.vue';
 import DiseaseDetail from '../components/DiseaseInfo.vue';
 import TrainList from '../components/TrainList.vue'
+import Register from '../components/auth/Register.vue'
 const routes = [
     {
         path: '/',
@@ -27,6 +28,12 @@ const routes = [
         name: 'TrainList',
         meta: { title: '병해충 판별 결과' },
         component: TrainList,
+    },
+    {
+        path: '/register',
+        name: 'Register',
+        meta: { title: '회원가입' },
+        component: Register,
     },
 ];
 

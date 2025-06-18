@@ -15,6 +15,12 @@
           <p>신뢰도: {{ (item.confidence ?? 0).toFixed(2) }}%</p>
           <p class="text-sm text-gray-400">업로드: {{ new Date(item.created_at).toLocaleDateString() }}</p>
           <p v-if="item.userOpinion" class="text-sm text-primary">사용자 의견: {{ item.userOpinion }}</p>
+
+          <button
+              class="btn btn-sm btn-error mt-2"
+              @click="deleteItem(item.id)"
+          >삭제</button>
+
         </div>
       </div>
     </div>
@@ -30,6 +36,16 @@ const items = ref([])
 const loading = ref(true)
 const error = ref(null)
 
+const deleteItem = async (id) => {
+  if(!confirm('정말 삭제할까요?')) return
+
+  try {
+    await axios.delete(`http://127.0.0.1/api/results/${id}`)
+    items.value = items.value.filter(item => item.id !== id)
+  }catch (err){
+    alert('삭제 실패')
+  }
+}
 onMounted(async () => {
   try {
     const res = await axios.get('http://127.0.0.1/api/results')

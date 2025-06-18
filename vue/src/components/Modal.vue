@@ -16,7 +16,7 @@
           <select id="crop-select" class="select select-bordered w-full"
                   v-model="selectedCrop">
             <option disabled value="">작물을 선택하세요</option>
-            <option v-for="crop in cropOptions" :key="crop" :value="crop">{{ crop }}</option>
+            <option v-for="crop in cropOptions" :key="crop.value" :value="crop.value">{{ crop.label }}</option>
           </select>
         </div>
 
@@ -74,7 +74,18 @@ const loading = ref(false)
 const photo = ref(null) // 선택된 파일 저장
 const previewUrl = ref(null)
 const selectedCrop = ref('') // 작물 선택값
-const cropOptions = ref(['감자', '딸기', '토마토', '복숭아', '후추', '체리','블루베리','옥수수','포도']) // 필요 시 더 추가 가능
+const cropOptions =ref([
+  { label: '감자', value: 'potato' },
+  { label: '딸기', value: 'strawberry' },
+  { label: '토마토', value: 'tomato' },
+  { label: '복숭아', value: 'peach' },
+  { label: '후추', value: 'pepper' },
+  { label: '체리', value: 'cherry' },
+  { label: '블루베리', value: 'blueberry' },
+  { label: '옥수수', value: 'corn' },
+  { label: '포도', value: 'grape' }
+])
+
 // 파일 선택 핸들러
 function onFileChange(event) {
   photo.value = event.target.files[0]

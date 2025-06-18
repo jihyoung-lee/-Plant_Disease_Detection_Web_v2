@@ -29,8 +29,13 @@ class PredictController extends Controller
         }*/
         [$hashname, $existingTrain, $validatedData] = $this->validateDuplicatePhoto($request);
 
+
         if ($existingTrain) {
-            $photo = $this->createDataFromExisting($existingTrain, $hashname);
+            // 중복이면 insert 하지 않고 기존 데이터만 반환
+            return response()->json([
+                'message' => '중복된 이미지입니다. 기존 데이터를 반환합니다.',
+                'data' => $existingTrain
+            ], 200);
         } else {
             try {
                 [$cropName, $sickNameKor, $confidence, $path] = $this->fileUpload($modelUrl, $validatedData['image'], $request);

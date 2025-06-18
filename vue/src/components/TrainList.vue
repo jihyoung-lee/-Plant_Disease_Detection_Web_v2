@@ -1,7 +1,5 @@
 <template>
   <div class="p-4">
-    <h2 class="text-2xl font-bold mb-4">병해충 판별 결과</h2>
-
     <Loading v-if="loading" />
     <div v-else-if="error" class="text-red-500">{{ error }}</div>
 
@@ -21,37 +19,51 @@
           <p>신뢰도: {{ (item.confidence ?? 0).toFixed(2) }}%</p>
           <p class="text-sm text-gray-400">업로드: {{ new Date(item.created_at).toLocaleDateString() }}</p>
           <p v-if="item.userOpinion" class="text-sm text-primary">사용자 의견: {{ item.userOpinion }}</p>
-
+          <button class="btn btn-sm btn-accent mt-2" @click="openOpinionModal(item)">의견 남기기</button>
           <button class="btn btn-sm btn-error mt-2" @click="deleteItem(item.id)">
             삭제
           </button>
+
         </div>
       </div>
     </div>
   </div>
+  <OpinionModal ref="modalRef" :targetItem="selectedItem" @sent="fetchResults" />
+  <!-- 페이지네이션 -->
+  <div class="pagination mt-6 text-center" v-if="pagination && pagination.total > pagination.per_page">
+    <div class="join">
+      <button
+          class="join-item btn"
+          v-for="n in pagination.last_page"
+          :key="n"
+          :class="{ 'btn-active': String(route.query.page || '1') === String(n) }"
+          @click="goToPage(n)"
+      >
+        {{ n }}
+      </button>
+    </div>
+  </div>
+
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import Loading from '@/components/Loading.vue'
+import OpinionModal from '@/components/OpinionModal.vue'
 
 const items = ref([])
+const pagination = ref(null)
 const loading = ref(true)
 const error = ref(null)
 
-// 삭제 기능
-const deleteItem = async (id) => {
-  if (!confirm('정말 삭제할까요?')) return
+const modalRef = ref(null)
+const selectedItem = ref(null)
 
-  try {
-    await axios.delete(`http://127.0.0.1/api/results/${id}`)
-    items.value = items.value.filter(item => item.id !== id)
-  } catch (err) {
-    alert('삭제 실패')
-  }
-}
+const route = useRoute()
+const router = useRouter()
 
-// 도감 링크 조회 함수
+// 병해충 도감 링크 조회
 const fetchDiseaseInfo = async (item) => {
   try {
     const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
@@ -73,18 +85,43 @@ const fetchDiseaseInfo = async (item) => {
     } else {
       item.link = null
     }
-  } catch (err) {
+  } catch {
     item.link = null
   }
 }
+//의견 모달
+const openOpinionModal = (item) => {
+  selectedItem.value = item
+  modalRef.value.open()
+}
 
-// 페이지 로드시 실행
-onMounted(async () => {
+// 페이지 전환 함수
+const goToPage = (page) => {
+  if (page !== Number(route.query.page || 1)) {
+    router.push({ query: { ...route.query, page } })
+  }
+}
+
+// 데이터 로딩 함수
+const fetchResults = async () => {
+  loading.value = true
+  error.value = null
+
+  const page = route.query.page || 1
+
   try {
-    const res = await axios.get('http://127.0.0.1/api/results')
+    const res = await axios.get(`http://127.0.0.1/api/results`, {
+      params: { page }
+    })
+
     items.value = res.data.data || []
 
-    // 각 아이템에 대해 병해충 링크 확인
+    pagination.value = {
+      total: res.data.total,
+      per_page: res.data.per_page,
+      last_page: res.data.last_page,
+    }
+
     await Promise.all(items.value.map(item => fetchDiseaseInfo(item)))
 
   } catch (err) {
@@ -92,5 +129,21 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+// 삭제
+const deleteItem = async (id) => {
+  if (!confirm('정말 삭제할까요?')) return
+
+  try {
+    await axios.delete(`http://127.0.0.1/api/results/${id}`)
+    await fetchResults() // 삭제 후 새로고침
+  } catch {
+    alert('삭제 실패')
+  }
+}
+
+// 초기 로딩 & 페이지 변경 감지
+onMounted(fetchResults)
+watch(() => route.query.page, fetchResults)
 </script>

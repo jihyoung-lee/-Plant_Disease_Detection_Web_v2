@@ -11,7 +11,7 @@ class ResultController extends Controller
 {
     public function index()
     {
-        $results = Train::latest()->paginate(5);
+        $results = Train::latest()->paginate(6);
         return response()->json($results);
     }
 

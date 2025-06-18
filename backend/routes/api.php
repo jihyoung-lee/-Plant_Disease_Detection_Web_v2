@@ -21,6 +21,7 @@ Route::prefix('predict')->group(function () {
     Route::post('/', [PredictController::class, 'store']);
     Route::post('/{id}/opinion', [PredictController::class, 'opinionStore']);
 });
+
 Route::get('/disease-info', [SearchController::class, 'infoApi']);
 Route::get('/diseases', [SearchController::class, 'diseaseListApi']);
 Route::get('/cache-test', function () {
@@ -33,6 +34,7 @@ Route::get('/cache-test', function () {
 
 Route::get('/results', [ResultController::class, 'index']);
 Route::get('/results/{id}', [ResultController::class, 'show']);
+Route::delete('/results/{id}', [ResultController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

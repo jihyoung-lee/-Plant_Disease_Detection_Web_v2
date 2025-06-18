@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Train;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ResultController extends Controller
 {
@@ -18,5 +19,23 @@ class ResultController extends Controller
     {
         $result = Train::findOrFail($id);
         return response()->json($result);
+    }
+
+    public function destroy($id){
+        $photo = Train::find($id);
+
+        if(!$photo)
+        {
+            return response()->json(['error' => '사진을 찾을 수 없습니다'], 404);
+        }
+
+        if(Storage::disk('public')->exists($photo->url)) {
+            Storage::disk('public')->delete($photo->url);
+        }
+
+        //DB delete
+        $photo->delete();
+
+        return response()->json(['message' => '삭제 완료'], 200);
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Train;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class PredictController extends Controller
@@ -22,9 +23,10 @@ class PredictController extends Controller
         }
 
         $modelUrl = config('services.predict.endpoint');;
-        if (Http::post($modelUrl)->serverError()) {
+
+      /*  if (Http::post($modelUrl)->serverError()) {
             return response()->json(['error' => '서버와의 연결이 끊어졌습니다.'], 503);
-        }
+        }*/
 
         [$hashname, $existingTrain, $validatedData] = $this->validateDuplicatePhoto($request);
 
@@ -44,6 +46,7 @@ class PredictController extends Controller
             'data' => $photo
         ], 201);
     }
+
 
     public function opinionStore(Request $request, $id)
     {
@@ -65,7 +68,7 @@ class PredictController extends Controller
     {
         $url = $modelUrl;
 
-        $cropName = $request->input('cropName');
+        $inputCropName = $request->input('cropName');
 
         // 이미지와 crop 파라미터 함께 전송
         $response = Http::attach(
@@ -73,28 +76,28 @@ class PredictController extends Controller
             file_get_contents($photoFile),
             $photoFile->getClientOriginalName()
         )->post($url, [
-            'cropName' => $cropName
+            'cropName' => $inputCropName
         ]);
 
         if ($response->failed()) {
             throw new \Exception("API 응답 오류");
         }
+        // FastAPI 응답 값에서 추출
+        $predictedCropName = $response->json('cropName') ?? 'x';
+        $sickNameKor = $response->json('sickNameKor') ?? 'x';
+        $confidence = $response->json('confidence') ?? 0;
 
-        $cropName = $response->json('cropName') ?: 'unknown';
-        $sickNameKor = $response->json('sickNameKor') ?: 'unknown';
-        $confidence = $response->json('confidence') ?: 0;
+        $hashname = $photoFile->hashName(); // 고유 파일명
+        $path = $photoFile->storeAs('images', $hashname, 'public');
 
-
-        #$path = $photoFile->store("public/{$cropName}_{$sickNameKor}", 's3');
-        $path = 'test';
-        return [$cropName, $sickNameKor, $confidence, $path];
+        return [$predictedCropName, $sickNameKor, $confidence, $path];
     }
 
     protected function storePhoto($path, $hashname, Request $request, $cropName, $sickNameKor, $confidence)
     {
         return Train::create([
             #'url' => Storage::disk('s3')->url($path),
-            'url' => 'test',
+            'url' => Storage::disk('public')->url($path), // public/storage/images/xxx.jpg
             'hashname' => $hashname,
             'originalname' => $request->file('image')->getClientOriginalName(),
             'cropName' => $cropName,

@@ -9,9 +9,11 @@
         "ext-simplexml": "*",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^10.0",
-        "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.8",
-        "league/flysystem-aws-s3-v3": "^3.0"
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "symfony/http-client": "^7.3",
+        "symfony/mailgun-mailer": "^7.1",
+        "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.20",

@@ -69,7 +69,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import api from '@/lib/axios'
 
 const services = ref([])
 const error = ref('')
@@ -82,10 +82,6 @@ const cropOptions = ref([
   { label: '딸기', value: 'strawberry' },
   { label: '토마토', value: 'tomato' },
   { label: '복숭아', value: 'peach' },
-  { label: '후추', value: 'pepper' },
-  { label: '체리', value: 'cherry' },
-  { label: '블루베리', value: 'blueberry' },
-  { label: '옥수수', value: 'corn' },
   { label: '포도', value: 'grape' }
 ])
 
@@ -97,7 +93,7 @@ function onFileChange(event) {
 // 도감 링크 조회 함수
 async function fetchDiseaseInfo(item) {
   try {
-    const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
+    const res = await api.get(`disease-info`, {
       params: {
         cropName: item.cropName,
         sickNameKor: item.sickNameKor,
@@ -135,7 +131,7 @@ async function fetchData() {
     formData.append('image', photo.value)
     formData.append('cropName', selectedCrop.value)
 
-    const res = await axios.post(`http://127.0.0.1/api/predict`, formData, {
+    const res = await api.post(`/predict`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

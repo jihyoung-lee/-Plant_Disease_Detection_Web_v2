@@ -1,9 +1,13 @@
 <template>
+  <!--
   <div class="max-w-md mx-auto p-6">
     <h2 class="text-2xl font-bold mb-4">회원가입</h2>
     <form @submit.prevent="register">
       <input v-model="form.name" class="input input-bordered w-full mb-2" placeholder="이름" required />
       <input v-model="form.email" type="email" class="input input-bordered w-full mb-2" placeholder="이메일" required />
+      <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+        인증번호 전송
+      </button>
       <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
       <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
 
@@ -24,6 +28,32 @@
       </div>
     </form>
   </div>
+  -->
+
+  <div class="max-w-md mx-auto p-6">
+    <h2 class="text-2xl font-bold mb-4">회원가입</h2>
+
+    <!-- 1단계 기본정보 -->
+    <form @submit.prevent="register" v-if="step === 1">
+      <input v-model="form.name" class="input input-boreder w-full mb-2" placeholder="이름" required />
+      <div class="relative">
+      <input v-model="form.email"
+             type="email"
+             class="input input-bordered w-full mb-2"
+             placeholder="이메일"
+             required
+             @blur="validateEmail"
+      />
+      <span v-if="emailStatus === 'checking'" class="absolute right-3 top-3 loading loading-spinner loading-xs"></span>
+      <span v-if="emailStatus === 'invalid'" class="absolute right-3 top-3 text-error">✗</span>
+      <span v-if="emailStatus === 'duplicate'" class="absolute right-3 top-3 text-error">✗</span>
+      <span v-if="emailStatus === 'valid'" class="absolute right-3 top-3 text-success">✓</span>
+      </div>
+      <p v-if="emailError" class="text-xs text-error mt-1">{{ emailError }}</p>
+  <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
+      <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
+    </form>
+  </div>
 </template>
 
 <script setup>
@@ -33,16 +63,57 @@ import api from '@/lib/axios'
 
 const router = useRouter()
 
+const step = ref(1)
 const form = ref({
   name: '',
   email: '',
   password: '',
   password_confirmation: ''
 })
-
+const verificationCode = ref(Array(6).fill(''))
+const codeInputs = ref([])
+const verifying = ref(false)
 const error = ref('')
+const emailStatus = ref('') // '', 'checking', 'invalid', 'duplicate', 'valid'
+const emailError = ref('')
+const resendCooldown = ref(0)
+let cooldownInterval = null
 const loading = ref(false)
 
+// 이메일 유효성 검사
+const validateEmail = async () =>{
+  if (!form.value.email) {
+    emailStatus.value = ''
+    emailError.value = ''
+    return
+  }
+
+  // 기본 형식 검사
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(form.value.email)) {
+    emailStatus.value = 'invalid'
+    emailError.value = '유효한 이메일 형식이 아닙니다'
+    return
+}
+  emailStatus.value = 'checking'
+  emailError.value = ''
+  try {
+  // 이메일 중복 확인
+  const { data } = await api.get('/check-email', {
+    params: { email: form.value.email }
+  })
+
+  if (data.exists){
+    emailStatus.value = 'duplicate'
+    emailError.value = '이미 사용 중인 이메일입니다'
+  } else {
+    emailStatus.value = 'valid'
+    emailError.value = ''
+  }
+} catch (err) {
+  emailStatus.value = ''
+  emailError.value = '이메일 확인에 실패했습니다'
+}
 const register = async () => {
   error.value = ''
   loading.value = true

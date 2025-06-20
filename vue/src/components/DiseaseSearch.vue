@@ -141,10 +141,12 @@ import { useRoute, useRouter } from 'vue-router';
         },
       });
     }
-
-    //첫 실행 + 쿼리변경 감지
-    onMounted(fetchData);
-    watch(() => route.query, fetchData);
+// 초기 데이터 로드
+onMounted(() => {
+  if (route.query.search === '사과') { // 기본값인 경우
+    fetchData() // API 자동 호출
+  }
+})
 </script>
 
 <style scoped>

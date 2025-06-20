@@ -63,7 +63,7 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
-import axios from 'axios'
+import api from '@/lib/axios'
 import Loading from '@/components/Loading.vue'
 import { useRoute } from 'vue-router'
 
@@ -89,10 +89,7 @@ async function fetchData() {
   error.value = ''
 
   try {
-    // 스켈레톤 테스트용 지연
-    await new Promise(resolve => setTimeout(resolve, 800))
-
-    const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
+    const res = await api.get(`/disease-info`, {
       params: {
         cropName: props.cropName,
         sickNameKor: props.sickNameKor,

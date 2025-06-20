@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import axios from 'axios';
+import api from '@/lib/axios'
 import { watch, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -82,7 +82,7 @@ import { useRoute, useRouter } from 'vue-router';
     });
 
     async function fetchData() {
-      const search = route.query.search || '';
+      let search = route.query.search || '';
       const type = route.query.type || '1';
       const page = parseInt(route.query.page || '1', 10);
 
@@ -91,13 +91,25 @@ import { useRoute, useRouter } from 'vue-router';
         items.value = [];
         return;
       }
-      pagination.value.current_page = page;
+      // 첫 로드 시 기본값 설정 (사과)
+      if (!search.trim() && route.query.search === undefined) {
+        search = '사과';
+        // URL 업데이트 (히스토리에 남기지 않음)
+        router.replace({
+          path: '/disease-search',
+          query: {
+            ...route.query,
+            search: '사과'
+          }
+        });
+      }
 
+      pagination.value.current_page = page;
       loading.value = true;
       error.value = '';
 
       try {
-        const res = await axios.get('http://127.0.0.1/api/diseases', {
+        const res = await api.get('/diseases', {
           params: {
             type,
             search,

@@ -23,10 +23,8 @@ use App\Http\Controllers\Api\ResultController;
 
 // 회원가입 + 인증번호 발송
 Route::post('/register', [AuthController::class, 'register']);
-
 // 인증번호 확인
 Route::post('/verify', [VerificationController::class, 'verify']);
-
 // 인증번호 재발송
 Route::post('/resend-code', [VerificationController::class, 'resend']);
 
@@ -34,7 +32,7 @@ Route::get('/results', [resultController::class, 'index']);
 Route::get('/results/{id}', [ResultController::class, 'show']);
 Route::delete('/results/{id}', [ResultController::class, 'destroy']);
 
-Route::prefix('predict')->group(function () {
+Route::prefix('predict')->middleware('auth:api')->group(function () {
     Route::get('/', [PredictController::class, 'index']);
     Route::post('/', [PredictController::class, 'store']);
     Route::post('/{id}/opinion', [PredictController::class, 'opinionStore']);

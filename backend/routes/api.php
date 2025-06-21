@@ -21,9 +21,11 @@ use App\Http\Controllers\Api\ResultController;
 |
 */
 
-// 회원가입 + 인증번호 발송
+// 회원가입
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/notification', [VerificationController::class, 'notification']);
 // 인증번호 확인
+Route::post('check-email/{email}', [VerificationController::class, 'check_mail']);
 Route::post('/verify', [VerificationController::class, 'verify']);
 // 인증번호 재발송
 Route::post('/resend-code', [VerificationController::class, 'resend']);

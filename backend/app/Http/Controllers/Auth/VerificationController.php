@@ -2,16 +2,50 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Mail\VerificationCodeMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class VerificationController extends Controller
 {
+    public function notification(Request $request)
+    {
+        $validated = $request->validate(['email' => 'required|email|max:255']);
+        $user = User::firstOrCreate(
+            ['email' => $validated['email']],
+            [
+                'name' => 'temporary user', // 회원가입 이전이므로 기본값 설정
+                'password' => bcrypt(Str::random(32)) // 임시 비밀번호
+            ]
+        );
+        try{
+            $code = $user->generateVerificationCode();
+            Mail::to($user->email)->send(new VerificationCodeMail($user, $code));
+
+            return response()->json([
+                'success' => true,
+                'massage' => '인증번호가 이메일로 전송되었습니다',
+                'expires_at' => $user->verification_code_expires_at->format('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) {
+            Log::error('인증번호 전송 실패 :' .$e->getMessage(), [
+                'email' => $validated['email'],
+                'error' => $e->getTrace()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '인증번호 전송에 실패했습니다. 잠시 후 다시 시도해주세요.'
+            ], 500);
+        }
+    }
     public function verify(Request $request)
     {
+
         $request->validate([
             'email' => 'required|email',
             'code' => 'required|digits:6'
@@ -49,7 +83,10 @@ class VerificationController extends Controller
 
         $user = User::where('email', $validated)->firstOrFail();
         $code = $user->generateVerificationCode();
-        Mail::to($user->email)->send(new VerificationCodeMail($code));
+        Mail::to($user->email)->queue(
+            new VerificationCodeMail($user, $code)
+        );
+
 
         return response()->json([
             'message' => '새 인증코드가 전송되었습니다.'

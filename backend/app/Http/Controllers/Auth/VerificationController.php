@@ -30,7 +30,7 @@ class VerificationController extends Controller
             return response()->json([
                 'success' => true,
                 'massage' => '인증번호가 이메일로 전송되었습니다',
-                'expires_at' => $user->verification_code_expires_at->format('Y-m-d H:i:s')
+                'expires_at' => $user->code_expires_at->format('Y-m-d H:i:s')
             ]);
         } catch (\Exception $e) {
             Log::error('인증번호 전송 실패 :' .$e->getMessage(), [

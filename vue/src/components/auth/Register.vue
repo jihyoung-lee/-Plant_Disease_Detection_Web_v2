@@ -151,7 +151,8 @@ const notification = async () => {
   try {
     // API 호출 (응답 데이터 받기)
     const response = await api.post('/notification', {
-      email: form.value.email
+      email: form.value.email,
+      name: form.value.name
     });
 
     // 응답 데이터 활용
@@ -174,10 +175,10 @@ const notification = async () => {
   } catch (err) {
     // 상세한 에러 처리
     if (err.response) {
-      error.value = err.response.data.message ||
+      emailError.value = err.response.data.message ||
           `서버 오류 (${err.response.status})`;
     } else {
-      error.value = err.message || '네트워크 연결에 문제가 있습니다';
+      emailError.value = err.message || '네트워크 연결에 문제가 있습니다';
     }
 
     // 로그 기록 (개발용)

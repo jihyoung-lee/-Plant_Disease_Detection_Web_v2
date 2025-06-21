@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class VerificationController extends Controller
 {
@@ -18,7 +19,7 @@ class VerificationController extends Controller
         $user = User::firstOrCreate(
             ['email' => $validated['email']],
             [
-                'name' => 'temporary user', // 회원가입 이전이므로 기본값 설정
+                'name' => $request->name, // 회원가입 이전이므로 기본값 설정
                 'password' => bcrypt(Str::random(32)) // 임시 비밀번호
             ]
         );

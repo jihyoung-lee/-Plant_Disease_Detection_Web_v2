@@ -1,78 +1,63 @@
 <template>
-  <!--
-  <div class="max-w-md mx-auto p-6">
-    <h2 class="text-2xl font-bold mb-4">회원가입</h2>
-    <form @submit.prevent="register">
-      <input v-model="form.name" class="input input-bordered w-full mb-2" placeholder="이름" required />
-      <input v-model="form.email" type="email" class="input input-bordered w-full mb-2" placeholder="이메일" required />
-      <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-        인증번호 전송
-      </button>
-      <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
-      <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
+<div class="max-w-md mx-auto p-6">
+<h2 class="text-2xl font-bold mb-4">회원가입</h2>
 
-      <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-        <span v-if="loading" class="flex items-center justify-center">
-          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          처리 중...
-        </span>
-        <span v-else>가입하기</span>
-      </button>
-
-      <div v-if="error" class="mt-4 p-4 bg-red-50 text-red-600 rounded-md">
-        <p class="font-medium">오류 발생:</p>
-        <p class="mt-1">{{ error }}</p>
-      </div>
-    </form>
-  </div>
-  -->
-
-  <div class="max-w-md mx-auto p-6">
-    <h2 class="text-2xl font-bold mb-4">회원가입</h2>
-
-    <!-- 1단계 기본정보 -->
-    <form @submit.prevent="register" v-if="step === 1">
-      <input v-model="form.name" class="input input-boreder w-full mb-2" placeholder="이름" required />
-      <div class="relative">
+<!-- 1단계 기본정보 -->
+<form @submit.prevent="register" v-if="step === 1">
+  <input v-model="form.name" class="input input-boreder w-full mb-2" placeholder="이름" required />
+  <div class="flex items-center gap-2 mb-2">
+    <div class="relative w-full">
       <input v-model="form.email"
              type="email"
-             class="input input-bordered w-full mb-2"
+             class="input input-bordered w-full pr-10"
              placeholder="이메일"
              required
              @blur="validateEmail"
       />
-      <span v-if="emailStatus === 'checking'" class="absolute right-3 top-3 loading loading-spinner loading-xs"></span>
-      <span v-if="emailStatus === 'invalid'" class="absolute right-3 top-3 text-error">✗</span>
-      <span v-if="emailStatus === 'duplicate'" class="absolute right-3 top-3 text-error">✗</span>
-      <span v-if="emailStatus === 'valid'" class="absolute right-3 top-3 text-success">✓</span>
-      </div>
-      <p v-if="emailError" class="text-xs text-error mt-1">{{ emailError }}</p>
-  <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
-      <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
-    </form>
-  </div>
-  <!-- 2단계 인증번호 입력 -->
-  <form @submit.prevent="verify" v-if="step === 2">
-    <p class="mb-2">이메일로 전송된 인증번호 6자리를 입력해주세요.</p>
-    <div class="flex justify-between gap-2 mb-4">
-      <input
-          v-for="(digit, index) in verificationCode"
-          :key="index"
-          v-model="verificationCode[index]"
-          ref="codeInputs"
-          maxlength="1"
-          type="text"
-          inputmode="numeric"
-          class="input input-bordered w-10 text-center"
-          @input="handleCodeInput(index + 1, $event)"
-          @keydown="handleCodeDelete(index + 1, $event)"
-      />
+      <!-- 상태 아이콘 -->
+      <span v-if="emailStatus === 'checking'"
+            class="absolute right-3 top-1/2 -translate-y-1/2 loading loading-spinner loading-xs"></span>
+      <span v-if="emailStatus === 'invalid'"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-error">✗</span>
+      <span v-if="emailStatus === 'duplicate'"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-error">✗</span>
+      <span v-if="emailStatus === 'valid'"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-success">✓</span>
     </div>
+    <button
+        type="button"
+        class="btn btn-success btn-sm"
+        @click="notification"
+        :disabled="emailStatus !== 'valid' || loading"
+    >
+      인증
+    </button>
+  </div>
+  <p v-if="emailError" class="text-xs text-error mt-1">{{ emailError }}</p>
+  <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
+  <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
+</form>
 
-    <button type="submit" class="btn btn-primary w-full" :disabled="verifying">
+</div>
+<!-- 2단계 인증번호 입력 -->
+<form @submit.prevent="verify" v-if="step === 2">
+<p class="mb-2">이메일로 전송된 인증번호 6자리를 입력해주세요.</p>
+<div class="flex justify-between gap-2 mb-4">
+  <input
+      v-for="(digit, index) in verificationCode"
+      :key="index"
+      v-model="verificationCode[index]"
+      ref="codeInputs"
+      maxlength="1"
+      type="text"
+      inputmode="numeric"
+      class="input input-bordered w-10 text-center"
+      @input="handleCodeInput(index + 1, $event)"
+      @keydown="handleCodeDelete(index + 1, $event)"
+  />
+</div>
+
+<button type="submit" class="btn btn-primary w-full" :disabled="verifying">
     <span v-if="verifying" class="flex items-center justify-center">
       <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -80,22 +65,23 @@
       </svg>
       확인 중...
     </span>
-      <span v-else>인증 완료</span>
-    </button>
+  <span v-else>인증 완료</span>
+</button>
 
-    <!-- 재전송 버튼 -->
-    <button type="button" class="btn btn-ghost w-full mt-2" @click="resendVerification" :disabled="resendCooldown > 0">
-      <span v-if="resendCooldown > 0">{{ resendCooldown }}초 후 재전송 가능</span>
-      <span v-else>인증번호 다시 받기</span>
-    </button>
+<!-- 재전송 버튼 -->
+<button type="button" class="btn btn-ghost w-full mt-2" @click="resendVerification" :disabled="resendCooldown > 0">
+  <span v-if="resendCooldown > 0">{{ resendCooldown }}초 후 재전송 가능</span>
+  <span v-else>인증번호 다시 받기</span>
+</button>
 
-    <!-- 오류 메시지 -->
-    <div v-if="error" class="mt-4 p-4 bg-red-50 text-red-600 rounded-md">
-      <p class="font-medium">오류 발생:</p>
-      <p class="mt-1 whitespace-pre-line">{{ error }}</p>
-    </div>
-  </form>
+<!-- 오류 메시지 -->
+<div v-if="error" class="mt-4 p-4 bg-red-50 text-red-600 rounded-md">
+  <p class="font-medium">오류 발생:</p>
+  <p class="mt-1 whitespace-pre-line">{{ error }}</p>
+</div>
+</form>
 </template>
+
 
 <script setup>
 import { ref, onUnmounted, nextTick } from 'vue'

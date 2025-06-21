@@ -25,7 +25,7 @@ use App\Http\Controllers\Api\ResultController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/notification', [VerificationController::class, 'notification']);
 // 인증번호 확인
-Route::get('check-email/{email}', [VerificationController::class, 'check_mail']);
+Route::get('/check-email', [VerificationController::class, 'check_mail']);
 Route::post('/verify', [VerificationController::class, 'verify']);
 // 인증번호 재발송
 Route::post('/resend-code', [VerificationController::class, 'resend']);

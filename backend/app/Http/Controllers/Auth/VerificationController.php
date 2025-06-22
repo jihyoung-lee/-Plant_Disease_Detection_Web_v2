@@ -69,12 +69,8 @@ class VerificationController extends Controller
             'email_verified_at' => now()
         ]);
 
-        $token = auth()->login($user);
-
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'message' => '이메일 인증이 완료되었습니다.'
         ]);
     }
 

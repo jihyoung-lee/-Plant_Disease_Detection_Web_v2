@@ -34,30 +34,27 @@
     </button>
   </div>
   <p v-if="emailError" class="text-xs text-error mt-1">{{ emailError }}</p>
-  <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
-  <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
-</form>
 
-</div>
-<!-- 2단계 인증번호 입력 -->
-<form @submit.prevent="verify" v-if="step === 2">
-<p class="mb-2">이메일로 전송된 인증번호 6자리를 입력해주세요.</p>
-<div class="flex justify-between gap-2 mb-4">
-  <input
-      v-for="(digit, index) in verificationCode"
-      :key="index"
-      v-model="verificationCode[index]"
-      ref="codeInputs"
-      maxlength="1"
-      type="text"
-      inputmode="numeric"
-      class="input input-bordered w-10 text-center"
-      @input="handleCodeInput(index + 1, $event)"
-      @keydown="handleCodeDelete(index + 1, $event)"
-  />
-</div>
+  <!-- 2단계 인증번호 입력 -->
+  <transition name="fade">
+  <form @submit.prevent="verify" v-if="step === 2" class="w-full">
+    <p class="mb-2 text-sm text-gray-700">이메일로 전송된 인증번호 6자리를 입력해주세요.</p>
+    <div class="flex justify-between gap-2 mb-4">
+      <input
+          v-for="(digit, index) in verificationCode"
+          :key="index"
+          v-model="verificationCode[index]"
+          ref="codeInputs"
+          maxlength="1"
+          type="text"
+          inputmode="numeric"
+          class="input input-bordered w-10 text-center"
+          @input="handleCodeInput(index + 1, $event)"
+          @keydown="handleCodeDelete(index + 1, $event)"
+      />
+    </div>
 
-<button type="submit" class="btn btn-primary w-full" :disabled="verifying">
+    <button type="submit" class="btn btn-primary w-full" :disabled="verifying">
     <span v-if="verifying" class="flex items-center justify-center">
       <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -65,21 +62,27 @@
       </svg>
       확인 중...
     </span>
-  <span v-else>인증 완료</span>
-</button>
+      <span v-else>인증 완료</span>
+    </button>
 
-<!-- 재전송 버튼 -->
-<button type="button" class="btn btn-ghost w-full mt-2" @click="resendVerification" :disabled="resendCooldown > 0">
-  <span v-if="resendCooldown > 0">{{ resendCooldown }}초 후 재전송 가능</span>
-  <span v-else>인증번호 다시 받기</span>
-</button>
+    <!-- 재전송 버튼 -->
+    <button type="button" class="btn btn-ghost w-full mt-2" @click="resendVerification" :disabled="resendCooldown > 0">
+      <span v-if="resendCooldown > 0">{{ resendCooldown }}초 후 재전송 가능</span>
+      <span v-else>인증번호 다시 받기</span>
+    </button>
 
-<!-- 오류 메시지 -->
-<div v-if="error" class="mt-4 p-4 bg-red-50 text-red-600 rounded-md">
-  <p class="font-medium">오류 발생:</p>
-  <p class="mt-1 whitespace-pre-line">{{ error }}</p>
-</div>
+    <!-- 오류 메시지 -->
+    <div v-if="error" class="mt-4 p-4 bg-red-50 text-red-600 rounded-md">
+      <p class="font-medium">오류 발생:</p>
+      <p class="mt-1 whitespace-pre-line">{{ error }}</p>
+    </div>
+  </form>
+  </transition>
+  <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
+  <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
 </form>
+
+</div>
 </template>
 
 
@@ -169,6 +172,7 @@ const notification = async () => {
 
       // 성공 메시지 표시 (옵션)
       alert('인증번호가 전송되었습니다. 이메일을 확인해주세요.');
+
     } else {
       throw new Error(response.data.message || '인증번호 전송에 실패했습니다');
     }
@@ -197,8 +201,6 @@ const notification = async () => {
         email : form.value.email,
         code : code
       })
-      // 회원가입 완료
-      await completeRegistration()
     } catch (err) {
       handleError(err)
       verificationCode.value = Array(6).fill('')

@@ -28,7 +28,7 @@ Route::post('/verify', [VerificationController::class, 'verify']);
 // 인증번호 재발송
 Route::post('/resend-code', [VerificationController::class, 'resend']);
 // 로그인
-Route::post('login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login']);
 Route::get('/results', [resultController::class, 'index']);
 Route::get('/results/{id}', [ResultController::class, 'show']);
 Route::delete('/results/{id}', [ResultController::class, 'destroy']);

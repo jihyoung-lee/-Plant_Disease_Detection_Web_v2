@@ -16,21 +16,30 @@ class VerificationController extends Controller
     public function notification(Request $request)
     {
         $validated = $request->validate(['email' => 'required|email|max:255']);
-        $user = User::firstOrCreate(
-            ['email' => $validated['email']],
-            [
-                'name' => $request->name, // 회원가입 이전이므로 기본값 설정
-                'password' => bcrypt(Str::random(32)) // 임시 비밀번호
-            ]
-        );
         try{
-            $code = $user->generateVerificationCode();
-            Mail::to($user->email)->send(new VerificationCodeMail($user, $code));
+            $email = $request->input("email");
+            $name = $request->input('name');
+
+            // 중복 확인
+            if (User::where('email', $email)->exists()) {
+                return response()->json(['message' => '이미 사용 중인 이메일입니다.'], 422);
+            }
+
+            $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $data = [
+                'email' => $email,
+                'name' => $name,
+                'code' => $code,
+            ];
+
+            // 배열을 json 문자열로 변환 json_encode()
+            Cache::put("verify:email:$email", json_encode($data), now()->addMinutes(60));
+
+            Mail::to($email)->send(new VerificationCodeMail($name, $code));
 
             return response()->json([
                 'success' => true,
                 'massage' => '인증번호가 이메일로 전송되었습니다',
-                'expires_at' => $user->code_expires_at->format('Y-m-d H:i:s')
             ]);
         } catch (\Exception $e) {
             Log::error('인증번호 전송 실패 :' .$e->getMessage(), [
@@ -46,28 +55,24 @@ class VerificationController extends Controller
     }
     public function verify(Request $request)
     {
+        $email = $request->input('email');
+        $code = $request->input('code');
 
-        $request->validate([
-            'email' => 'required|email',
-            'code' => 'required|digits:6'
-        ]);
+        $stored = Cache::get("verify:email:$email");
 
-        $user = User::where('email', $request->email)
-            ->where('verification_code', $request->code)
-            ->where('code_expires_at', '>', now())
-            ->first();
-
-        if (!$user) {
+        if (!$stored) {
             return response()->json([
                 'error' => '잘못된 인증코드 또는 만료된 코드입니다.'
             ], 401);
         }
 
-        $user->update([
-            'verification_code' => null,
-            'code_expires_at' => null,
-            'email_verified_at' => now()
-        ]);
+        $data = json_decode($stored, true);
+
+        if ($data['code'] != $code) {
+            return response()->json(['message' => '인증코드가 올바르지 않습니다.'], 400);
+        }
+
+        Cache::put("verified:email:$email", $data, now()->addMinutes(60));
 
         return response()->json([
             'message' => '이메일 인증이 완료되었습니다.'
@@ -116,8 +121,8 @@ class VerificationController extends Controller
                 '사용 가능한 이메일입니다',
         ];
 
-        //캐시 저장 60초
-        Cache::put($cacheKey, $response, now()->addSeconds(60));
+        //캐시 저장 10초
+        Cache::put($cacheKey, $response, now()->addSeconds(10));
 
         return response()->json($response);
     }

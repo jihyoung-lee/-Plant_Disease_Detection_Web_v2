@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable implements JWTSubject
 {
     protected $fillable = [
-        'name', 'email', 'password', 'verification_code', 'code_expires_at'
+        'name', 'email', 'password'
     ];
 
     // JWT 메서드
@@ -20,13 +20,4 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    // 인증번호 생성 메서드
-    public function generateVerificationCode()
-    {
-        $this->update([
-            'verification_code' => rand(100000, 999999),
-            'code_expires_at' => now()->addMinutes(30)
-        ]);
-        return $this->verification_code;
-    }
 }

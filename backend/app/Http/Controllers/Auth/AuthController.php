@@ -12,9 +12,10 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        \Log::info('요청 받은 값:', ['data' => $request->all()]);
         $request->validate([
             'name' => 'required|string',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email',
             'password' => 'required|min:8|confirmed'
         ]);
 
@@ -25,7 +26,7 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'message' => '회원가입 성공! 이메일로 인증코드가 전송되었습니다.'
+            'message' => '회원가입 성공!'
         ], 201);
     }
 }

@@ -17,7 +17,7 @@ class VerificationCodeMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user, string $verificationCode)
+    public function __construct(string $user, string $verificationCode)
     {
         $this->user = $user;  // 프로퍼티 할당
         $this->verificationCode = $verificationCode;

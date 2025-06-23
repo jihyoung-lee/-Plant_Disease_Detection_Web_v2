@@ -1,8 +1,6 @@
 <?php
-use App\Http\Controllers\Auth\{
-    AuthController,
-    VerificationController
-};
+
+use App\Http\Controllers\Auth\{AuthController, LoginController, VerificationController};
 use App\Http\Controllers\Api\PredictController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,7 +27,8 @@ Route::get('/check-email', [VerificationController::class, 'check_email']);
 Route::post('/verify', [VerificationController::class, 'verify']);
 // 인증번호 재발송
 Route::post('/resend-code', [VerificationController::class, 'resend']);
-
+// 로그인
+Route::post('login', [LoginController::class, 'login']);
 Route::get('/results', [resultController::class, 'index']);
 Route::get('/results/{id}', [ResultController::class, 'show']);
 Route::delete('/results/{id}', [ResultController::class, 'destroy']);

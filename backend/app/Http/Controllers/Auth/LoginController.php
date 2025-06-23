@@ -19,8 +19,6 @@ class LoginController extends Controller
             ], 401);
         }
 
-        $request->session()->regenerate();
-
         return response()->json([
             'message' => '로그인 성공',
             'user' => Auth::user(),

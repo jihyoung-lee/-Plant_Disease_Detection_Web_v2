@@ -72,7 +72,7 @@ class VerificationController extends Controller
             return response()->json(['message' => '인증코드가 올바르지 않습니다.'], 400);
         }
 
-        Cache::put("verified:email:$email", $data, now()->addMinutes(60));
+        Cache::put("verified:email:$email", $data, now()->addMinutes(30));
 
         return response()->json([
             'message' => '이메일 인증이 완료되었습니다.'

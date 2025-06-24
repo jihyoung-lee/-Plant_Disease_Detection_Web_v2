@@ -35,7 +35,7 @@ class VerificationController extends Controller
             // 배열을 json 문자열로 변환 json_encode()
             Cache::put("verify:email:$email", json_encode($data), now()->addMinutes(30));
 
-            Mail::to($email)->send(new VerificationCodeMail($name, $code));
+            Mail::to($email)->queue(new VerificationCodeMail($name, $code));
 
             return response()->json([
                 'success' => true,

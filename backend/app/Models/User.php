@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable implements JWTSubject
 {
     protected $fillable = [
-        'name', 'email', 'password'
+        'name', 'email', 'password' ,'created_at', 'update_at'
     ];
 
     // JWT 메서드

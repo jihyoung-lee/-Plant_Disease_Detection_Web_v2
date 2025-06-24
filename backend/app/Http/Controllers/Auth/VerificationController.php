@@ -5,14 +5,22 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\VerificationCodeMail;
 use App\Models\User;
+use App\Services\VerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class VerificationController extends Controller
 {
+    protected $verification;
+
+    // 생성자 주입
+    public function __construct(VerificationService $verification)
+    {
+        $this->verification = $verification;
+    }
+
     public function notification(Request $request)
     {
         $validated = $request->validate(['email' => 'required|email|max:255']);
@@ -24,18 +32,7 @@ class VerificationController extends Controller
             if (User::where('email', $email)->exists()) {
                 return response()->json(['message' => '이미 사용 중인 이메일입니다.'], 422);
             }
-
-            $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            $data = [
-                'email' => $email,
-                'name' => $name,
-                'code' => $code,
-            ];
-
-            // 배열을 json 문자열로 변환 json_encode()
-            Cache::put("verify:email:$email", json_encode($data), now()->addMinutes(30));
-
-            Mail::to($email)->queue(new VerificationCodeMail($name, $code));
+            $this->verification->generateCode($email, $name);
 
             return response()->json([
                 'success' => true,
@@ -84,7 +81,7 @@ class VerificationController extends Controller
         $validated = $this->check_email($request->email);
 
         $user = User::where('email', $validated)->firstOrFail();
-        $code = $user->generateVerificationCode();
+        $this->verification->generateCode($email, $name);
         Mail::to($user->email)->queue(
             new VerificationCodeMail($user, $code)
         );

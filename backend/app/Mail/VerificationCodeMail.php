@@ -28,6 +28,10 @@ class VerificationCodeMail extends Mailable
     public function build()
     {
         return $this->view('emails.verification')
-            ->subject('이메일 인증 코드');
+            ->subject('이메일 인증 코드')
+            ->with([
+                'user' => $this->user,
+                'verificationCode' => $this->verificationCode
+            ]);
     }
 }

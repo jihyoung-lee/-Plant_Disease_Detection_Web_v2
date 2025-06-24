@@ -78,14 +78,16 @@ class VerificationController extends Controller
 
     public function resend(Request $request)
     {
-        $validated = $this->check_email($request->email);
+        $email = $request->input("email");
+        $name = $request->input('name');
 
-        $user = User::where('email', $validated)->firstOrFail();
-        $this->verification->generateCode($email, $name);
-        Mail::to($user->email)->queue(
-            new VerificationCodeMail($user, $code)
+        // 인증 코드 생성 및 저장
+        $code = $this->verification->generateCode($email, $name);
+
+        // 인증 메일 전송
+        Mail::to($email)->queue(
+            new VerificationCodeMail($name, $code)
         );
-
 
         return response()->json([
             'message' => '새 인증코드가 전송되었습니다.'

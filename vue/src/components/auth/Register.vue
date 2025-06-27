@@ -205,6 +205,7 @@ const completeRegistration = async () => {
       email: form.value.email,
       password: form.value.password
     })
+    setAuthToken(response.data.token);
 
     alert('회원가입 완료!')
     router.push('/list')

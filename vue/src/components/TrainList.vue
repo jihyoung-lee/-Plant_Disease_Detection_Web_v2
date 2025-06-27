@@ -48,7 +48,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import api from '@/lib/axios'
 import Loading from '@/components/Loading.vue'
 import OpinionModal from '@/components/OpinionModal.vue'
 
@@ -66,7 +66,7 @@ const router = useRouter()
 // 병해충 도감 링크 조회
 const fetchDiseaseInfo = async (item) => {
   try {
-    const res = await axios.get(`http://127.0.0.1/api/disease-info`, {
+    const res = await api.get(`/disease-info`, {
       params: {
         cropName: item.cropName?.trim(),
         sickNameKor: item.sickNameKor?.trim(),
@@ -110,7 +110,7 @@ const fetchResults = async () => {
   const page = route.query.page || 1
 
   try {
-    const res = await axios.get(`http://127.0.0.1/api/results`, {
+    const res = await api.get(`/results`, {
       params: { page }
     })
 
@@ -136,7 +136,7 @@ const deleteItem = async (id) => {
   if (!confirm('정말 삭제할까요?')) return
 
   try {
-    await axios.delete(`http://127.0.0.1/api/results/${id}`)
+    await api.delete(`/results/${id}`)
     await fetchResults() // 삭제 후 새로고침
   } catch {
     alert('삭제 실패')

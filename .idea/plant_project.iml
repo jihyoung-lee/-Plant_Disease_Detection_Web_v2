@@ -119,12 +119,13 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/aws/aws-crt-php" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/aws/aws-sdk-php" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/mtdowling/jmespath.php" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/tymon/jwt-auth" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/lcobucci/jwt" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/lcobucci/clock" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/http-client" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/mailgun-mailer" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/http-client-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/namshi/jose" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/php-open-source-saver/jwt-auth" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

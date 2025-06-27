@@ -23,21 +23,32 @@
 
 <script setup>
 import logo from '@/assets/farmer.svg'
-import axios from '@/lib/axios.js'
+import api, { setAuthToken } from '@/lib/axios.js'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import SearchInput from "@/components/SearchInput.vue"
 import Modal from "@/components/Modal.vue"
 
 const route = useRoute()
-
 const user = ref(null)
 
 onMounted(async () => {
+  const token = localStorage.getItem('token')
+
+  if (token) {
+    setAuthToken(token) // axios 인스턴스에 Authorization 헤더 세팅
+    console.log('🟡 Token 설정됨:', token)
+  } else {
+    console.warn('🔴 토큰이 없습니다. 로그인 필요.')
+    return
+  }
+
   try {
-    const response = await axios.get('/user')
+    const response = await api.get('/me')
     user.value = response.data
-  } catch (e) {
+    console.log('🟢 사용자 정보 불러오기 성공:', user.value)
+  } catch (error) {
+    console.error('🔴 사용자 정보 불러오기 실패:', error?.response?.data || error.message)
     user.value = null
   }
 })

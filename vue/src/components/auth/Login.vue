@@ -44,7 +44,7 @@ const handleLogin = async () => {
 
   try {
     const res = await api.post('/login', { email: email.value, password: password.value })
-    const token = res.data.access_token
+    const token = res.data.token
     setAuthToken(token)  // axios 헤더 + localStorage 저장
     router.push('/list')     // 홈이나 원하는 페이지로 이동
   } catch (err) {

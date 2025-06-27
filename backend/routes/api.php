@@ -33,11 +33,14 @@ Route::post('/verify', [VerificationController::class, 'verify']);
 Route::post('/resend-code', [VerificationController::class, 'resend']);
 // 로그인
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth:api');
+Route::get('/me', [LoginController::class, 'me'])->middleware('auth:api');
+
 Route::get('/results', [resultController::class, 'index']);
 Route::get('/results/{id}', [ResultController::class, 'show']);
 Route::delete('/results/{id}', [ResultController::class, 'destroy']);
 
-Route::prefix('predict')->middleware('auth:jwt')->group(function () {
+Route::prefix('predict')->middleware('auth:api')->group(function () {
     Route::get('/', [PredictController::class, 'index']);
     Route::post('/', [PredictController::class, 'store']);
     Route::post('/{id}/opinion', [PredictController::class, 'opinionStore']);
@@ -52,9 +55,6 @@ Route::get('/cache-test', function () {
         'value' => Cache::get('greeting'),
     ];
 });
-Route::middleware('auth:jwt')->get('/user', function (Request $request) {
-    return response()->json($request->user());
-});
 Route::get('/debug-token', function (Request $request) {
     try {
         $user = JWTAuth::parseToken()->authenticate();
@@ -62,4 +62,7 @@ Route::get('/debug-token', function (Request $request) {
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 401);
     }
+});
+Route::options('/test-cors', function () {
+    return response()->json(['message' => 'OK']);
 });

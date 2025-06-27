@@ -15,16 +15,21 @@
     */
 return [
 
-    'paths' => ['api/*', 'login', 'logout', 'register', 'sanctum/csrf-cookie', 'email/*', 'user'],
+    'paths' => ['api/*', 'login', 'logout', 'register', 'email/*', 'user'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5174'],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => [
-'*'
+        'Content-Type',
+        'X-Requested-With',
+        'Authorization', // 대문자 A
+        'authorization', // 소문자 a 도 추가
+        'Accept',
+        'Origin',
     ],
     'exposed_headers' => [],
 

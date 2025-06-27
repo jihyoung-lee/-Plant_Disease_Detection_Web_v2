@@ -122,12 +122,13 @@
       <path value="$PROJECT_DIR$/backend/vendor/aws/aws-crt-php" />
       <path value="$PROJECT_DIR$/backend/vendor/aws/aws-sdk-php" />
       <path value="$PROJECT_DIR$/backend/vendor/mtdowling/jmespath.php" />
-      <path value="$PROJECT_DIR$/backend/vendor/tymon/jwt-auth" />
       <path value="$PROJECT_DIR$/backend/vendor/lcobucci/jwt" />
       <path value="$PROJECT_DIR$/backend/vendor/lcobucci/clock" />
       <path value="$PROJECT_DIR$/backend/vendor/symfony/http-client" />
       <path value="$PROJECT_DIR$/backend/vendor/symfony/mailgun-mailer" />
       <path value="$PROJECT_DIR$/backend/vendor/symfony/http-client-contracts" />
+      <path value="$PROJECT_DIR$/backend/vendor/php-open-source-saver/jwt-auth" />
+      <path value="$PROJECT_DIR$/backend/vendor/namshi/jose" />
     </include_path>
   </component>
   <component name="PhpInterpreters">

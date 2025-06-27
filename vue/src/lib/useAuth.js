@@ -7,7 +7,7 @@ const isAuthenticated = ref(false);
 export function useAuth() {
     const fetchUser = async () => {
         try {
-            const response = await api.get('/user');
+            const response = await api.get('/me');
             user.value = response.data;
             isAuthenticated.value = true;
         } catch (e) {

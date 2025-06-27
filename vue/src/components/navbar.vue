@@ -18,8 +18,8 @@
 <script setup>
 import logo from '@/assets/farmer.svg'
 import { useRoute } from 'vue-router'
-import SearchInput from "@/components/searchInput.vue";
-import Modal from "@/components/modal.vue";
+import SearchInput from "@/components/SearchInput.vue";
+import Modal from "@/components/Modal.vue";
 
 const route = useRoute()
 </script>

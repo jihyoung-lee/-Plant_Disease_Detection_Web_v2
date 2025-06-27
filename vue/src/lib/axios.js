@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost/api',
+    baseURL: 'http://127.0.0.1:8088/api',
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -19,7 +19,7 @@ export function setAuthToken(token) {
     }
 }
 
-// 초기화 시 토큰 복원 (선택 사항)
+// 초기화 시 토큰 복원
 const savedToken = localStorage.getItem('token');
 if (savedToken) setAuthToken(savedToken);
 

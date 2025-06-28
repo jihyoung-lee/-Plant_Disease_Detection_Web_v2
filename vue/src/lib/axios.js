@@ -4,12 +4,13 @@ import axios from 'axios';
 const token = localStorage.getItem('token'); // 저장한 토큰 불러오기
 
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8088/api',
+    baseURL: 'http://127.0.0.1:8081/api',
     headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
     },
+    withCredentials: true,
 });
 
 

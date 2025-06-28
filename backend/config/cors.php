@@ -24,18 +24,13 @@ return [
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => [
-        'Content-Type',
-        'X-Requested-With',
-        'Authorization', // 대문자 A
-        'authorization', // 소문자 a 도 추가
-        'Accept',
-        'Origin',
+        '*'
     ],
     'exposed_headers' => [],
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];
 

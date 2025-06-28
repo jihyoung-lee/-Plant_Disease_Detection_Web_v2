@@ -24,6 +24,12 @@
 
       <p class="text-red-500 text-sm mt-2" v-if="error">{{ error }}</p>
     </form>
+    <p class="mt-4 text-center text-sm text-gray-600">
+      아직 회원이 아니신가요?
+      <router-link to="/register" class="text-blue-600 hover:underline">
+        회원가입하기
+      </router-link>
+    </p>
   </div>
 </template>
 

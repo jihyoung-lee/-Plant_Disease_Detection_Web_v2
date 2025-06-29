@@ -14,7 +14,6 @@ class LoginController extends Controller
         if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
         return $this->respondWithToken($token);
     }
 
@@ -22,6 +21,11 @@ class LoginController extends Controller
     {
         auth('api')->logout();
         return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function refresh() {
+        $newToken = JWTAuth::refresh(JWTAuth::getToken());
+        return $this->respondWithToken($newToken);
     }
 
     public function me()

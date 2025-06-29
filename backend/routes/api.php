@@ -33,6 +33,7 @@ Route::post('/verify', [VerificationController::class, 'verify']);
 Route::post('/resend-code', [VerificationController::class, 'resend']);
 // 로그인
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/refresh', [LoginController::class, 'refresh']);
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth:api');
 Route::get('/me', [LoginController::class, 'me'])->middleware('auth:api');
 

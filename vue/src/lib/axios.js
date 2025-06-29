@@ -24,6 +24,10 @@ export function setAuthToken(token) {
     }
 }
 
+export function removeAuthToken() {
+    delete api.defaults.headers.common['Authorization'];
+    localStorage.removeItem('token');
+}
 // 초기화 ( 시작 시 저장된 토큰 사용 )
 const savedToken = localStorage.getItem('token');
 if (savedToken) setAuthToken(savedToken);

@@ -12,7 +12,7 @@
 
     <div v-if="user" class="flex items-center gap-2">
       <span>{{ user.name }}</span>
-      <router-link to="/me" class="btn btn-outline btn-sm">Profile</router-link>
+      <button class="btn btn-outline btn-sm" @click="logout">로그아웃</button>
     </div>
     <router-link v-else to="/login" class="btn">로그인</router-link>
   </div>
@@ -20,7 +20,7 @@
 
 <script setup>
 import logo from '@/assets/farmer.svg'
-import api, { setAuthToken } from '@/lib/axios.js'
+import api, { removeAuthToken, setAuthToken } from '@/lib/axios.js'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SearchInput from "@/components/SearchInput.vue"
@@ -28,6 +28,17 @@ import SearchInput from "@/components/SearchInput.vue"
 const route = useRoute()
 const router = useRouter()
 const user = ref(null)
+
+const logout = async () => {
+  try {
+    await api.post('/logout')  // 백엔드로 로그아웃 요청
+  } catch (err) {
+    console.warn('서버 로그아웃 실패:', err.message)  // 어차피 클라쪽 정리 중요함
+  } finally {
+    removeAuthToken()
+    router.push('/login')  // 로그인 페이지로 이동
+  }
+}
 
 onMounted(async () => {
   const token = localStorage.getItem('token')

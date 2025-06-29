@@ -50,6 +50,7 @@ const handleLogin = async () => {
 
   try {
     const res = await api.post('/login', { email: email.value, password: password.value })
+    console.log('응답:', res.data)
     const token = res.data.token
     setAuthToken(token)  // axios 헤더 + localStorage 저장
     router.push('/list')     // 홈이나 원하는 페이지로 이동

@@ -15,11 +15,7 @@ class LoginController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
-        ]);
+        return $this->respondWithToken($token);
     }
 
     public function logout()
@@ -31,6 +27,14 @@ class LoginController extends Controller
     public function me()
     {
         return response()->json(auth('api')->user());
+    }
+
+    protected function respondWithToken($token) {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
+        ]);
     }
 }
 

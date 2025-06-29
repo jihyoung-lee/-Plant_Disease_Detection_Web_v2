@@ -197,14 +197,13 @@ const completeRegistration = async () => {
       password_confirmation: form.value.password_confirmation
     }
 
-    console.log('보낼 데이터:', payload)
-
     await api.post('/register', payload)
 
     await api.post('/login', {
       email: form.value.email,
       password: form.value.password
     })
+    // 수정필요
     setAuthToken(response.data.token);
 
     alert('회원가입 완료!')

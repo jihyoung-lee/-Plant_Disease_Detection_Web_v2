@@ -1,3 +1,4 @@
+
 <template>
   <div class="max-w-sm mx-auto mt-20 p-6 border rounded shadow">
     <h2 class="text-2xl font-bold mb-4 text-center">로그인</h2>
@@ -36,24 +37,24 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api, { setAuthToken } from '@/lib/axios'
+import api from '@/lib/axios'
+import { useAuthStore } from '@/lib/auth' // ✅ 이거 꼭 추가해줘
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
 const router = useRouter()
+const auth = useAuthStore() // ✅ 여기도
 
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-
   try {
-    const res = await api.post('/login', { email: email.value, password: password.value })
-    console.log('응답:', res.data)
-    const token = res.data.token
-    setAuthToken(token)  // axios 헤더 + localStorage 저장
-    router.push('/list')     // 홈이나 원하는 페이지로 이동
+    await api.post('/login', { email: email.value, password: password.value })
+    console.log('로그인 응답 쿠키 확인:', document.cookie);
+    await auth.fetchUser() // 로그인 후 사용자 정보 갱신
+    router.replace('/list')
   } catch (err) {
     error.value = '이메일 또는 비밀번호가 잘못되었습니다.'
   } finally {
@@ -61,3 +62,5 @@ const handleLogin = async () => {
   }
 }
 </script>
+
+

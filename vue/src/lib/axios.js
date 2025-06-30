@@ -1,64 +1,40 @@
-// axios.js
 import axios from 'axios';
 
-const token = localStorage.getItem('token'); // 저장한 토큰 불러오기
-
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8081/api',
+    baseURL: '/api',
     headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
     },
-    withCredentials: true,
+    withCredentials: true, // 쿠키 자동 포함
 });
+let isRefreshing = false;
 
-
-// 토큰 설정 함수
-export function setAuthToken(token) {
-    if (token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        localStorage.setItem('token', token);
-    } else {
-        delete api.defaults.headers.common['Authorization'];
-        localStorage.removeItem('token');
-    }
-}
-
-export function removeAuthToken() {
-    delete api.defaults.headers.common['Authorization'];
-    localStorage.removeItem('token');
-}
-// 초기화 ( 시작 시 저장된 토큰 사용 )
-const savedToken = localStorage.getItem('token');
-if (savedToken) setAuthToken(savedToken);
-
-// 응답 인터셉터 : 401-> /refresh
 api.interceptors.response.use(
     res => res,
     async err => {
         const orig = err.config;
+        if (!err.response) return Promise.reject(err);
 
-        //access token 만료 -> refresh
-        if (err.response?.status === 401 && !orig._retry) {
+        // auth 관련 경로는 인터셉터에서 그냥 건너뛰기
+        const skip = ['/login', '/register', '/refresh', '/me'].some(p => orig.url.includes(p));
+        if (skip) return Promise.reject(err);
+
+        if (err.response.status === 401 && !orig._retry && !isRefreshing) {
             orig._retry = true;
+            isRefreshing = true;
             try {
-                const { data } = await api.post('/refresh');
-                const newToken = data.access_token;
-
-                // 새 토큰 저장 및 헤더 갱신
-                setAuthToken(newToken);
-                orig.headers['Authorization'] = `Bearer ${newToken}`;
-
-                return api(orig); // 원래 요청 재시도
-            } catch (refreshErr){
-                // refresh 실패 시  -> 로그아웃 처리 or 에러 반환
-                setAuthToken(null);
-                return Promise.reject(refreshErr);
+                await api.post('/refresh');
+                return api(orig);
+            } catch (e) {
+                return Promise.reject(e);
+            } finally {
+                isRefreshing = false;
             }
         }
+
         return Promise.reject(err);
     }
 );
-// ✅ 반드시 api도 export
-export default api;
 
+export default api;

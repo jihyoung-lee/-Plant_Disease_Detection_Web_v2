@@ -10,49 +10,37 @@
 
     <SearchInput />
 
-    <div v-if="user" class="flex items-center gap-2">
-      <span>{{ user.name }}</span>
-      <button class="btn btn-outline btn-sm" @click="logout">로그아웃</button>
+    <div v-if="auth.user" class="flex items-center gap-2">
+      <span>{{ auth.user.name }}</span>
+      <button class="btn btn-outline btn-sm" @click="handleLogout">로그아웃</button>
     </div>
     <router-link v-else to="/login" class="btn">로그인</router-link>
   </div>
 </template>
-
 <script setup>
 import logo from '@/assets/farmer.svg'
-import api, { removeAuthToken, setAuthToken } from '@/lib/axios.js'
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import SearchInput from "@/components/SearchInput.vue"
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/lib/auth'
+import { useRouter, useRoute } from 'vue-router'
+import SearchInput from '@/components/SearchInput.vue'
 
 const route = useRoute()
 const router = useRouter()
-const user = ref(null)
+const auth = useAuthStore()
 
-const logout = async () => {
-  try {
-    await api.post('/logout')  // 백엔드로 로그아웃 요청
-  } catch (err) {
-    console.warn('서버 로그아웃 실패:', err.message)  // 어차피 클라쪽 정리 중요함
-  } finally {
-    removeAuthToken()
-    router.push('/login')  // 로그인 페이지로 이동
-  }
+const handleLogout = async () => {
+  await auth.logout()
+  router.push('/login')
 }
 
 onMounted(async () => {
-  const token = localStorage.getItem('token')
-  if (!token) return
+  const publicPages = ['/login', '/register']
+  if (publicPages.includes(route.path)) return
 
-  setAuthToken(token)
-
-  try {
-    const res = await api.get('/me')
-    user.value = res.data
-  } catch (err) {
-    console.error('사용자 정보 불러오기 실패:', err)
-    localStorage.removeItem('token')
-    router.push('/login')
+  if (!auth.user) {
+    await auth.fetchUser()
+    if (!auth.user) router.push('/login')
   }
 })
+
 </script>

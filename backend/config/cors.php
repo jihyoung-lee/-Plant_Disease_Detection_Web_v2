@@ -19,14 +19,14 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['http://localhost:5174'],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => [
         '*'
     ],
-    'exposed_headers' => [],
+    'exposed_headers' => ['Authorization','Set-Cookie'],
 
     'max_age' => 0,
 

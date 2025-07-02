@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import Home from '@/components/Home.vue'
 import DiseaseSearch from '@/components/DiseaseSearch.vue';
 import DiseaseDetail from '../components/DiseaseInfo.vue';
 import TrainList from '../components/TrainList.vue'
@@ -9,7 +10,7 @@ const routes = [
         path: '/',
         name: 'Home',
         meta: { title: '병해충 도감 검색' },
-        component: DiseaseSearch, // 일단 DiseaseSearch를 기본으로
+        component: Home , // 일단 DiseaseSearch를 기본으로
     },
     {
         path: '/disease/:cropName/:sickNameKor',

@@ -1,25 +1,27 @@
 <template>
   <div class="navbar bg-base-100 shadow-sm w-full px-4">
+    <!-- 로고 -->
     <div class="w-10 rounded-full">
       <img alt="logo" :src="logo" />
     </div>
 
+    <!-- 제목 -->
     <div class="flex-1">
       <a class="btn btn-ghost text-xl">{{ route.meta.title || '병해충 AI' }}</a>
     </div>
 
-    <modal />
-    <div class="flex-none">
+    <!-- 오른쪽 영역: 검색 + 로그인/프로필 -->
+    <div class="flex items-center gap-4">
       <SearchInput />
-    </div>
 
-    <div v-if="user" class="flex items-center gap-2">
-      <span>{{ user.name }}</span>
-      <router-link to="/profile" class="btn btn-outline btn-sm">Profile</router-link>
+      <div v-if="user" class="flex items-center gap-2">
+        <router-link to="/profile" class="btn btn-outline btn-sm">{{ user.name }}</router-link>
+      </div>
+      <router-link v-else to="/login" class="btn btn-sm">로그인</router-link>
     </div>
-    <router-link v-else to="/login" class="btn">로그인</router-link>
   </div>
 </template>
+
 
 <script setup>
 import logo from '@/assets/farmer.svg'

@@ -15,6 +15,7 @@
       <SearchInput />
 
       <div v-if="userStore.user" class="flex items-center gap-2">
+        <Modal />
         <router-link to="/profile" class="btn btn-outline btn-sm">{{ userStore.user.name }}</router-link>
       </div>
       <router-link v-else to="/login" class="btn btn-sm">로그인</router-link>

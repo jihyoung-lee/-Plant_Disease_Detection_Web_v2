@@ -2,16 +2,24 @@
   <div class="text-gray-800">
 
     <!-- Hero Section -->
-    <section id="header" class="min-h-screen bg-white flex items-center py-16">
-      <div class="container mx-auto px-6 md:px-12">
-        <div class="md:w-2/3 text-center md:text-left">
-          <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
+    <section id="header" class="relative min-h-screen bg-white flex items-center py-16 overflow-hidden">
+      <img
+          :src="farmerImage"
+          class="absolute top-36 right-1 w-64 md:w-72 lg:w-[600px] z-0 pointer-events-none select-none"
+      />
+
+      <div class="container mx-auto px-6 md:px-12 z-10 relative">
+        <div class="max-w-xl text-center md:text-left mx-auto md:ml-0">
+          <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
             AI 작물 병해 진단 시스템
           </h1>
-          <p class="text-lg md:text-xl text-gray-600 mb-6">
+          <p class="text-lg md:text-xl text-gray-600 mb-8">
             딥러닝을 활용한 자가 진단 AI, PC와 모바일 모두 지원
           </p>
-          <a href="#howtouse" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded shadow transition">
+          <a
+              href="#howtouse"
+              class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded shadow transition"
+          >
             How To Use
           </a>
         </div>
@@ -22,7 +30,9 @@
     <section id="predict" class="py-20 bg-gray-50">
       <div class="container mx-auto px-6 text-center">
         <h2 class="text-3xl font-bold mb-4">작물의 병해 진단</h2>
-        <p class="text-gray-600 mb-12">총 38개의 병해 결과 제공</p>
+        <p class="text-gray-600 mb-12">
+          현재 총 5종의 주요 과수(감자, 딸기, 복숭아, 토마토, 포도)에 대한 병해 진단을 지원합니다.
+        </p>
 
         <div class="grid gap-8 grid-cols-1 md:grid-cols-3">
           <div
@@ -88,6 +98,9 @@
 
 
 <script setup>
+
+const farmerImage = new URL('../assets/bgimg.png', import.meta.url).href
+
 const cards = [
   {
     icon: new URL('../assets/clipboard-data.svg', import.meta.url).href,
@@ -122,10 +135,10 @@ const infos = [
 ]
 
 const steps = [
-  { title: 'AI 진단할 작물 이미지를 준비해주세요', desc: '이미지 용량이 너무 크면 조절해주세요' },
-  { title: '작물 진단 버튼 클릭 후 이미지를 업로드', desc: '사진을 첨부하지 않으면 경고메세지가 뜹니다' },
-  { title: '잠시 기다리면 진단 결과가 나옵니다', desc: '서버 연결이 끊기면 나중에 다시 시도해주세요' },
-  { title: '결과를 확인하고 링크를 클릭합니다', desc: '병해와 관련된 정보들을 확인할 수 있습니다' }
+  { title: 'STEP 1 : AI 진단할 작물 이미지를 준비해주세요', desc: '이미지 용량이 너무 크면 조절해주세요' },
+  { title: 'STEP 2 : 작물 진단 버튼 클릭 후 이미지를 업로드', desc: '사진을 첨부하지 않으면 경고메세지가 뜹니다' },
+  { title: 'STEP 3 : 잠시 기다리면 진단 결과가 나옵니다', desc: '서버 연결이 끊기면 나중에 다시 시도해주세요' },
+  { title: 'STEP 4 : 결과를 확인하고 링크를 클릭합니다', desc: '병해와 관련된 정보들을 확인할 수 있습니다' }
 ]
 </script>
 

@@ -29,22 +29,26 @@ import Navbar from "@/components/navbar.vue";
 }
 
 .left-bg {
-  display: block;
-  width: 300px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 20vw;
+  max-width: 280px;
   height: auto;
-  margin: 0;
-  padding: 0;
+  opacity: 0.6;
+  z-index: 0;
+  pointer-events: none;
 }
+
 .right-bg {
   position: absolute;
   top: 0;
   right: 0;
-  width: 300px;
+  width: 35vw;         /* 기존보다 확대 */
+  max-width: 480px;    /* 최대 사이즈 설정 */
   height: auto;
-  margin: 0;
-  padding: 0;
   opacity: 0.3;
-  z-index: 10;
+  z-index: 0;
   pointer-events: none;
 }
 

@@ -9,7 +9,7 @@ const routes = [
     {
         path: '/',
         name: 'Home',
-        meta: { title: '병해충 도감 검색' },
+        meta: { title: 'AI 병해 진단 서비스' },
         component: Home , // 일단 DiseaseSearch를 기본으로
     },
     {

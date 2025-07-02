@@ -143,10 +143,15 @@ import { useRoute, useRouter } from 'vue-router';
     }
 // 초기 데이터 로드
 onMounted(() => {
-  if (route.query.search === '사과') { // 기본값인 경우
-    fetchData() // API 자동 호출
+  if (route.query.search === '사과') {
+    fetchData()
   }
 })
+
+// 페이지나 검색어가 바뀔 때 자동 호출
+watch(() => route.query, () => {
+  fetchData();
+}, { deep: true })
 </script>
 
 <style scoped>

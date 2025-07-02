@@ -37,12 +37,14 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { setAuthToken } from '@/lib/axios'
+import { useUserStore } from '@/stores/user'
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
 const router = useRouter()
+const userStore = useUserStore()
 
 const handleLogin = async () => {
   loading.value = true
@@ -52,6 +54,10 @@ const handleLogin = async () => {
     const res = await api.post('/login', { email: email.value, password: password.value })
     const token = res.data.token
     setAuthToken(token)  // axios 헤더 + localStorage 저장
+
+    // 로그인 성공 후
+    userStore.setUser(response.data.user, response.data.token)
+
     router.push('/list')     // 홈이나 원하는 페이지로 이동
   } catch (err) {
     error.value = '이메일 또는 비밀번호가 잘못되었습니다.'

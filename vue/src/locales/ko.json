@@ -25,6 +25,14 @@
   "step_4_title": "STEP 4 : 결과를 확인하고 링크를 클릭합니다",
   "step_4_desc": "병해와 관련된 정보들을 확인할 수 있습니다",
 
+  "title" : "병해충 AI",
+  "meta_home": "AI 병해 진단 서비스",
+  "meta_disease_detail": "병해충 상세정보",
+  "meta_disease_search": "병해충 도감 검색",
+  "meta_train_list": "병해충 판별 결과",
+  "meta_register": "회원가입",
+  "meta_login": "로그인",
+
   "login": "로그인",
   "logout": "로그아웃"
 }

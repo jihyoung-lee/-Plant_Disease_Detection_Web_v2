@@ -1,64 +1,70 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router'
+import i18n from '../i18n.js'
 import Home from '@/components/Home.vue'
-import DiseaseSearch from '@/components/DiseaseSearch.vue';
-import DiseaseDetail from '../components/DiseaseInfo.vue';
+import DiseaseSearch from '@/components/DiseaseSearch.vue'
+import DiseaseDetail from '../components/DiseaseInfo.vue'
 import TrainList from '../components/TrainList.vue'
 import Register from '../components/auth/Register.vue'
 import Login from '@/components/auth/Login.vue'
+
 const routes = [
     {
         path: '/',
         name: 'Home',
-        meta: { title: 'AI 병해 진단 서비스' },
-        component: Home , // 일단 DiseaseSearch를 기본으로
+        meta: { titleKey: 'meta_home' },
+        component: Home,
     },
     {
         path: '/disease/:cropName/:sickNameKor',
         name: 'DiseaseDetail',
-        meta: { title: '병해충 상세정보' },
+        meta: { titleKey: 'meta_disease_detail' },
         component: DiseaseDetail,
         props: true,
     },
     {
         path: '/disease-search',
         name: 'DiseaseSearch',
-        meta: { title: '병해충 도감 검색' },
+        meta: { titleKey: 'meta_disease_search' },
         component: DiseaseSearch,
     },
     {
         path: '/list',
         name: 'TrainList',
-        meta: { title: '병해충 판별 결과' },
+        meta: { titleKey: 'meta_train_list' },
         component: TrainList,
     },
     {
         path: '/register',
         name: 'Register',
-        meta: { title: '회원가입' },
+        meta: { titleKey: 'meta_register' },
         component: Register,
     },
     {
         path: '/login',
         name: 'Login',
         component: Login,
-        meta: { guestOnly: true }, // 로그인된 사용자 접근 방지하려면 사용
+        meta: { guestOnly: true, titleKey: 'meta_login' },
     },
-];
-
+]
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
-});
-// 중복 로그인 방지
+})
+
+// 중복 로그인 방지 및 다국어 타이틀 적용
 router.beforeEach((to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('token')
 
     if (to.meta.guestOnly && isAuthenticated) {
-        next('/') // 이미 로그인한 경우 홈으로
+        next('/')
     } else {
+        const titleKey = to.meta.titleKey
+        if (titleKey) {
+            document.title = i18n.global.t(titleKey)
+        }
         next()
     }
 })
 
-export default router;
+export default router

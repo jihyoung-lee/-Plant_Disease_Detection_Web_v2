@@ -25,6 +25,14 @@
   "step_4_title": "STEP 4: Check the result and click the link.",
   "step_4_desc": "You can find detailed information related to the disease.",
 
+  "title" : "AI Plant Disease Detection",
+  "meta_home": "AI Crop Disease Check",
+  "meta_disease_detail": "Disease Info",
+  "meta_disease_search": "Find Crop Diseases",
+  "meta_train_list": "Check Results",
+  "meta_register": "Sign Up",
+  "meta_login": "Log In",
+
   "login": "Login",
   "logout": "Logout"
 }

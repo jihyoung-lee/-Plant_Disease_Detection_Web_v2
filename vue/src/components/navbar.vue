@@ -7,7 +7,7 @@
 
     <!-- 제목 -->
     <div class="flex-1">
-      <a class="btn btn-ghost text-xl">{{ route.meta.title || '병해충 AI' }}</a>
+      <a class="btn btn-ghost text-xl">{{ route.meta.title || $t("title") }}</a>
     </div>
 
     <!-- 오른쪽 영역 -->
@@ -20,11 +20,11 @@
         </button>
         <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
             popover id="popover-1" style="position-anchor:--anchor-1">
-          <router-link to="/logout" class="btn btn-sm">로그아웃</router-link>
+          <router-link to="/logout" class="btn btn-sm">{{ $t('logout') }}</router-link>
         </ul>
       </template>
 
-      <router-link v-else to="/login" class="btn btn-sm">로그인</router-link>
+      <router-link v-else to="/login" class="btn btn-sm">{{ $t('login') }}</router-link>
     </div>
   </div>
 </template>

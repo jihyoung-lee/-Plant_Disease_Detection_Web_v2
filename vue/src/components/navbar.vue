@@ -10,18 +10,25 @@
       <a class="btn btn-ghost text-xl">{{ route.meta.title || '병해충 AI' }}</a>
     </div>
 
-    <!-- 오른쪽 영역: 검색 + 로그인/프로필 -->
+    <!-- 오른쪽 영역 -->
     <div class="flex items-center gap-4">
       <SearchInput />
 
-      <div v-if="userStore.user" class="flex items-center gap-2">
-        <Modal />
-        <router-link to="/profile" class="btn btn-outline btn-sm">{{ userStore.user.name }}</router-link>
-      </div>
+      <template v-if="userStore.user">
+        <button class="btn" popovertarget="popover-1" style="anchor-name:--anchor-1">
+          {{ userStore.user.name }}
+        </button>
+        <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
+            popover id="popover-1" style="position-anchor:--anchor-1">
+          <router-link to="/logout" class="btn btn-sm">로그아웃</router-link>
+        </ul>
+      </template>
+
       <router-link v-else to="/login" class="btn btn-sm">로그인</router-link>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import logo from '@/assets/farmer.svg'

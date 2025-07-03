@@ -1,0 +1,30 @@
+{
+  "hero_h1": "AI Plant Disease Detection System",
+  "hero_p1": "Self-diagnosis AI powered by deep learning, available on both PC and mobile",
+
+  "card_p1": "Our system currently supports disease diagnosis for five key crops: potato, strawberry, peach, tomato, and grape.",
+
+  "card_1_title": "Simple and Easy Self-Diagnosis",
+  "card_1_desc": "Quickly control diseases with just one photo using our AI diagnosis system.",
+  "card_2_title": "Supports Both PC and Mobile",
+  "card_2_desc": "Convenient access regardless of the device type.",
+  "card_3_title": "Linked to Pest & Disease Encyclopedia",
+  "card_3_desc": "Check various information provided by the Rural Development Administration.",
+
+  "infos_1_title": "Plant Disease Detection",
+  "infos_1_text": "A crop diagnosis service using deep learning technology.",
+  "infos_2_title": "Pest & Disease Info",
+  "infos_2_text": "Pest and disease information provided by the Rural Development Administration.",
+
+  "step_1_title": "STEP 1: Prepare the crop image for AI diagnosis.",
+  "step_1_desc": "Please resize the image if the file size is too large.",
+  "step_2_title": "STEP 2: Click the diagnosis button and upload the image.",
+  "step_2_desc": "A warning message will appear if no image is attached.",
+  "step_3_title": "STEP 3: Wait a moment for the diagnosis result.",
+  "step_3_desc": "If the server is disconnected, please try again later.",
+  "step_4_title": "STEP 4: Check the result and click the link.",
+  "step_4_desc": "You can find detailed information related to the disease.",
+
+  "login": "Login",
+  "logout": "Logout"
+}

@@ -12,7 +12,7 @@
         @keyup.enter="searchAction"
     />
 
-    <button class="btn btn-sm btn-success" @click="searchAction">검색</button>
+    <button class="btn btn-sm btn-success" @click="searchAction">{{ $t("search") }}</button>
   </div>
 </template>
 

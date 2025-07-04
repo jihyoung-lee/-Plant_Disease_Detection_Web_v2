@@ -29,7 +29,7 @@
     <!-- Cards Section -->
     <section id="predict" class="py-20 bg-gray-50">
       <div class="container mx-auto px-6 text-center">
-        <h2 class="text-3xl font-bold mb-4">작물의 병해 진단</h2>
+        <h2 class="text-3xl font-bold mb-4">{{ $t('card_h1') }}</h2>
         <p class="text-gray-600 mb-12">
         {{ $t('card_p1')}}
         </p>
@@ -65,7 +65,7 @@
                   class="bg-white text-green-600 px-4 py-2 rounded hover:bg-green-100 transition"
                   @click="$router.push(info.link)"
               >
-                자세히 보기
+                More details
               </button>
             </div>
           </div>
@@ -76,13 +76,13 @@
     <!-- How to Use -->
     <section id="howtouse" class="py-20 bg-gray-800 text-white">
       <div class="container mx-auto px-6 text-center">
-        <h2 class="text-3xl font-bold mb-4">사용 방법</h2>
-        <p class="text-gray-300 mb-6">단계별로 따라와 주세요</p>
+        <h2 class="text-3xl font-bold mb-4">How To Use</h2>
+        <p class="text-gray-300 mb-6">{{ $t('step_p1') }}</p>
         <button
             class="bg-white text-green-600 font-semibold py-3 px-6 rounded shadow hover:bg-green-100 transition mb-10"
             @click="$router.push('/photo')"
         >
-          AI 진단하러 가기
+          {{ $t('step_bt1') }}
         </button>
 
         <div class="space-y-8 max-w-2xl mx-auto text-left">

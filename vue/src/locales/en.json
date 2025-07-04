@@ -2,6 +2,7 @@
   "hero_h1": "AI Plant Disease Detection System",
   "hero_p1": "Self-diagnosis AI powered by deep learning, available on both PC and mobile",
 
+  "card_h1": "AI-based crop disease diagnosis",
   "card_p1": "Our system currently supports disease diagnosis for five key crops: potato, strawberry, peach, tomato, and grape.",
 
   "card_1_title": "Simple and Easy Self-Diagnosis",
@@ -16,6 +17,8 @@
   "infos_2_title": "Pest & Disease Info",
   "infos_2_text": "Pest and disease information provided by the Rural Development Administration.",
 
+  "step_p1": "Follow the steps",
+  "step_bt1": "Try AI Diagnosis",
   "step_1_title": "STEP 1: Prepare the crop image for AI diagnosis.",
   "step_1_desc": "Please resize the image if the file size is too large.",
   "step_2_title": "STEP 2: Click the diagnosis button and upload the image.",
@@ -34,5 +37,10 @@
   "meta_login": "Log In",
 
   "login": "Login",
-  "logout": "Logout"
+  "logout": "Logout",
+  "logging": "logging in ...",
+  "login_p1": "Not a member yet?",
+  "signup": "Sign up",
+
+  "search": "search"
 }

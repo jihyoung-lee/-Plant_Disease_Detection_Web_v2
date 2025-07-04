@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-sm mx-auto mt-20 p-6 border rounded shadow">
-    <h2 class="text-2xl font-bold mb-4 text-center">로그인</h2>
+    <h2 class="text-2xl font-bold mb-4 text-center">{{ $t('login') }}</h2>
 
     <form @submit.prevent="handleLogin">
       <input
@@ -19,15 +19,15 @@
       />
 
       <button class="btn btn-primary w-full" :disabled="loading">
-        {{ loading ? '로그인 중...' : '로그인' }}
+        {{ loading ? $t('logging') : $t('login')  }}
       </button>
 
       <p class="text-red-500 text-sm mt-2" v-if="error">{{ error }}</p>
     </form>
     <p class="mt-4 text-center text-sm text-gray-600">
-      아직 회원이 아니신가요?
+      {{ $t("login_p1") }}
       <router-link to="/register" class="text-blue-600 hover:underline">
-        회원가입하기
+        {{ $t("signup") }}
       </router-link>
     </p>
   </div>

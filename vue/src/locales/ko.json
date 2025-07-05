@@ -44,6 +44,10 @@
 
   "register": "회원가입",
   "verification": "인증",
+  "name": "이름",
+  "email": "이메일",
+  "password": "비밀번호",
+  "password_confirmation": "비밀번호 확인",
   "verifing": "확인 중..",
   "confirm": "확인",
   "register_email_p1": "이메일로 전송된 인증번호 6자리를 입력해주세요",

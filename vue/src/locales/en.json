@@ -43,6 +43,10 @@
   "signup": "Sign up",
 
   "verification": "Send Verification",
+  "name": "name",
+  "email": "email",
+  "password": "password",
+  "password_confirmation": "password confirm",
   "verifing": "verifing..",
   "confirm": "Confirm",
   "register_email_p1": "Please enter the 6-digit verification code sent to your email",

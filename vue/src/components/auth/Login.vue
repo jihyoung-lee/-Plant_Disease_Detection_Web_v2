@@ -6,14 +6,14 @@
       <input
           v-model="email"
           type="email"
-          placeholder="이메일"
+          placeholder="$t('email')"
           class="input input-bordered w-full mb-3"
           required
       />
       <input
           v-model="password"
           type="password"
-          placeholder="비밀번호"
+          placeholder="$t('password')"
           class="input input-bordered w-full mb-3"
           required
       />

@@ -5,14 +5,14 @@
     <form @submit.prevent="handleSubmit">
       <!-- 1단계: 기본정보 입력 -->
       <div v-if="step === 1">
-        <input v-model="form.name" class="input input-bordered w-full mb-2" placeholder="이름" required />
+        <input v-model="form.name" class="input input-bordered w-full mb-2" placeholder="$t('name')" required />
 
         <div class="flex items-center gap-2 mb-2">
           <div class="relative w-full">
             <input v-model="form.email"
                    type="email"
                    class="input input-bordered w-full pr-10"
-                   placeholder="이메일"
+                   placeholder="$t('email')"
                    required
                    @blur="validateEmail"
             />
@@ -67,8 +67,8 @@
 
       <!-- 3단계: 비밀번호 입력 -->
       <div v-if="step === 3">
-        <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
-        <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
+        <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="$t('password')" required minlength="8" />
+        <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="$t('password_confirmation')" required minlength="8" />
         <button type="submit" class="btn btn-primary w-full" :disabled="loading">
           {{ $t("confirm") }}
         </button>

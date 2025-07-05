@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-md mx-auto p-6">
-    <h2 class="text-2xl font-bold mb-4">회원가입</h2>
+    <h2 class="text-2xl font-bold mb-4">{{ $t('register') }}</h2>
 
     <form @submit.prevent="handleSubmit">
       <!-- 1단계: 기본정보 입력 -->
@@ -24,7 +24,7 @@
           </div>
 
           <button type="submit" class="btn btn-success w-24 shrink-0" :disabled="emailStatus !== 'valid' || loading">
-            인증
+            {{ $t('verification') }}
           </button>
         </div>
 
@@ -33,7 +33,7 @@
 
       <!-- 2단계: 인증번호 입력 -->
       <div v-if="step === 2">
-        <p class="mb-2 text-sm text-gray-700">이메일로 전송된 인증번호 6자리를 입력해주세요.</p>
+        <p class="mb-2 text-sm text-gray-700">{{ $t("register_email_p1") }}</p>
         <div class="flex justify-between gap-2 mb-4">
           <input
               v-for="(digit, index) in verificationCode"
@@ -50,13 +50,13 @@
         </div>
 
         <button type="submit" class="btn btn-primary w-full" :disabled="verifying">
-          <span v-if="verifying">확인 중...</span>
-          <span v-else>인증 완료</span>
+          <span v-if="verifying">{{ $t("verifing") }}</span>
+          <span v-else>{{ $t("confirm") }}</span>
         </button>
 
         <button type="button" class="btn btn-ghost w-full mt-2" @click="resendVerification" :disabled="resendCooldown > 0">
-          <span v-if="resendCooldown > 0">{{ resendCooldown }}초 후 재전송 가능</span>
-          <span v-else>인증번호 다시 받기</span>
+          <span v-if="resendCooldown > 0">{{ $t('register_email_resend_in', { seconds: resendCooldown }) }}</span>
+          <span v-else>{{ $t("register_email_resend") }}</span>
         </button>
 
         <div v-if="error" class="mt-4 p-4 bg-red-50 text-red-600 rounded-md">
@@ -70,7 +70,7 @@
         <input v-model="form.password" type="password" class="input input-bordered w-full mb-2" placeholder="비밀번호" required minlength="8" />
         <input v-model="form.password_confirmation" type="password" class="input input-bordered w-full mb-4" placeholder="비밀번호 확인" required minlength="8" />
         <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-          가입 완료
+          {{ $t("confirm") }}
         </button>
       </div>
     </form>

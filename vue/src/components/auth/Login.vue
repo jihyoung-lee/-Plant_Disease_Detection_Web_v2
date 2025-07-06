@@ -6,14 +6,14 @@
       <input
           v-model="email"
           type="email"
-          placeholder="$t('email')"
+          :placeholder="$t('email')"
           class="input input-bordered w-full mb-3"
           required
       />
       <input
           v-model="password"
           type="password"
-          placeholder="$t('password')"
+          :placeholder="$t('password')"
           class="input input-bordered w-full mb-3"
           required
       />
@@ -38,7 +38,9 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { setAuthToken } from '@/lib/axios'
 import { useUserStore } from '@/stores/user'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const email = ref('')
 const password = ref('')
 const error = ref('')

@@ -35,6 +35,11 @@ return [
     ],
     'predict' => [
         'endpoint' => env('PREDICT_URL', 'http://127.0.0.1:5000/predict'),
-    ]
+    ],
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => 'http://localhost', // 사용 안 함 (token 방식)
+    ],
 
 ];

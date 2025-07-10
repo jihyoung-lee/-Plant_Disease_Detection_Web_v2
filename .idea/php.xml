@@ -129,6 +129,14 @@
       <path value="$PROJECT_DIR$/backend/vendor/symfony/http-client-contracts" />
       <path value="$PROJECT_DIR$/backend/vendor/php-open-source-saver/jwt-auth" />
       <path value="$PROJECT_DIR$/backend/vendor/namshi/jose" />
+      <path value="$PROJECT_DIR$/backend/vendor/psr/cache" />
+      <path value="$PROJECT_DIR$/backend/vendor/phpseclib/phpseclib" />
+      <path value="$PROJECT_DIR$/backend/vendor/google/apiclient" />
+      <path value="$PROJECT_DIR$/backend/vendor/google/apiclient-services" />
+      <path value="$PROJECT_DIR$/backend/vendor/google/auth" />
+      <path value="$PROJECT_DIR$/backend/vendor/firebase/php-jwt" />
+      <path value="$PROJECT_DIR$/backend/vendor/paragonie/random_compat" />
+      <path value="$PROJECT_DIR$/backend/vendor/paragonie/constant_time_encoding" />
     </include_path>
   </component>
   <component name="PhpInterpreters">

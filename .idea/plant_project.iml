@@ -126,6 +126,14 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/http-client-contracts" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/namshi/jose" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/php-open-source-saver/jwt-auth" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/firebase/php-jwt" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/google/apiclient" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/google/apiclient-services" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/google/auth" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/paragonie/constant_time_encoding" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/paragonie/random_compat" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phpseclib/phpseclib" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/psr/cache" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

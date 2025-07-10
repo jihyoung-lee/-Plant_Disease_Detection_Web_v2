@@ -1,27 +1,38 @@
 <template>
-  <GoogleLogin @success="onSuccess" @error="onError" />
+  <GoogleLogin
+      :callback="onSuccess"
+      @error="onError"
+  />
 </template>
 
-<script>
+<script setup>
 import { GoogleLogin } from 'vue3-google-login'
 import api from '@/lib/axios'
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
 
+const userStore = useUserStore()
+const router = useRouter()
 const onSuccess = async (res) => {
-  const token = res.credential
 
-  // 이 토큰을 라라벨 백엔드로 전달해서 로그인 처리
-  const response = await api.post('auth/google', {
-    token,
-  })
+  const googleIdToken = res.credential
 
-  const jwt = response.data.token
-  localStorage.setItem('token', jwt)
+  try {
+    const response = await api.post('/auth/google', {
+      token: googleIdToken
+    })
 
-  console.log('로그인 성공:', response.data.user)
+    const jwt = response.data.token
+    const user = response.data.user
+
+    userStore.setUser(user, jwt)  // pinia에 저장
+    router.push('/')
+  } catch (err) {
+    console.error('🔴 백엔드 로그인 실패:', err.response?.data || err.message)
+  }
 }
+
 const onError = () => {
-  console.error('구글 로그인 실패')
+  console.error('❌ 구글 로그인 실패')
 }
 </script>
-
-

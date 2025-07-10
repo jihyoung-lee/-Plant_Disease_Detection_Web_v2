@@ -30,10 +30,12 @@
         {{ $t("signup") }}
       </router-link>
     </p>
+    <GoogleLogin />
   </div>
 </template>
 
 <script setup>
+import GoogleLogin from "@/components/auth/GoogleLogin.vue"
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { setAuthToken } from '@/lib/axios'

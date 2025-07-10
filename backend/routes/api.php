@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Api\ResultController;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Http\Controllers\Auth\GoogleLoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +35,9 @@ Route::post('/resend-code', [VerificationController::class, 'resend']);
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth:api');
 Route::get('/me', [LoginController::class, 'me'])->middleware('auth:api');
+
+//google
+Route::post('/auth/google', [GoogleLoginController::class, 'handle']);
 
 Route::get('/results', [resultController::class, 'index']);
 Route::get('/results/{id}', [ResultController::class, 'show']);

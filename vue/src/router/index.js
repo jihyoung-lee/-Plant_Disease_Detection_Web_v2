@@ -6,7 +6,7 @@ import DiseaseDetail from '../components/DiseaseInfo.vue'
 import TrainList from '../components/TrainList.vue'
 import Register from '../components/auth/Register.vue'
 import Login from '@/components/auth/Login.vue'
-
+import Logout from '@/components/auth/Logout.vue'
 const routes = [
     {
         path: '/',
@@ -44,6 +44,10 @@ const routes = [
         name: 'Login',
         component: Login,
         meta: { guestOnly: true, titleKey: 'meta_login' },
+    },
+    {
+        path: '/logout',
+        component: Logout,
     },
 ]
 

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Api\ResultController;
 use App\Http\Controllers\Auth\GoogleLoginController;
-
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 /*
 |--------------------------------------------------------------------------
 | API Routes

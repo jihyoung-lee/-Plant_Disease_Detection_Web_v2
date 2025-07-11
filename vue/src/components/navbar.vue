@@ -14,7 +14,8 @@
     <div class="flex items-center gap-4">
       <SearchInput />
 
-      <template v-if="userStore.user">
+      <div v-if="userStore.user">
+        <Modal />
         <button class="btn" popovertarget="popover-1" style="anchor-name:--anchor-1">
           {{ userStore.user.name }}
         </button>
@@ -22,7 +23,7 @@
             popover id="popover-1" style="position-anchor:--anchor-1">
           <router-link to="/logout" class="btn btn-sm">{{ $t('logout') }}</router-link>
         </ul>
-      </template>
+      </div>
 
       <router-link v-else to="/login" class="btn btn-sm">{{ $t('login') }}</router-link>
     </div>

@@ -24,13 +24,15 @@
 
       <p class="text-red-500 text-sm mt-2" v-if="error">{{ error }}</p>
     </form>
+    <div class="flex justify-center mt-4">
+      <GoogleLogin />
+    </div>
     <p class="mt-4 text-center text-sm text-gray-600">
       {{ $t("login_p1") }}
       <router-link to="/register" class="text-blue-600 hover:underline">
         {{ $t("signup") }}
       </router-link>
     </p>
-    <GoogleLogin />
   </div>
 </template>
 

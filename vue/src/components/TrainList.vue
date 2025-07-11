@@ -3,7 +3,30 @@
     <Loading v-if="loading" />
     <div v-else-if="error" class="text-red-500">{{ error }}</div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- 데이터 없음 상태 -->
+    <div
+        v-else-if="items.length === 0"
+        class="flex flex-col items-center justify-center h-[400px] text-center text-success bg-base-100 border-2 border-dashed border-success rounded-lg"
+    >
+      <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-16 h-16 mb-4 text-success"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 17v-6h6v6m2 4H7a2 2 0 01-2-2V7a2 2 0 012-2h3l2-2h2l2 2h3a2 2 0 012 2v12a2 2 0 01-2 2z" />
+      </svg>
+      <h2 class="text-lg font-semibold text-success">아직 등록된 분석 결과가 없어요</h2>
+      <p class="text-sm mb-4 text-success">사진을 업로드하면 분석 결과가 이곳에 보여집니다.</p>
+      <router-link to="/upload" class="btn btn-success btn-sm animate-bounce hover:scale-105 transition-transform duration-200">
+        사진 업로드하러 가기
+      </router-link>
+    </div>
+
+    <!-- 데이터가 있을 때 -->
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <div v-for="item in items" :key="item.id" class="card shadow-md bg-base-100">
         <figure>
           <img :src="item.url" alt="사진" class="w-full h-48 object-cover"/>
@@ -11,24 +34,25 @@
         <div class="card-body">
           <h3 class="card-title">
             {{ item.cropName }} -
-            <a v-if="item.link" :href="item.link" class="text-green-400 underline">
+            <a v-if="item.link" :href="item.link" class="text-success underline">
               {{ item.sickNameKor }}
             </a>
             <span v-else>{{ item.sickNameKor }}</span>
           </h3>
           <p>신뢰도: {{ (item.confidence ?? 0).toFixed(2) }}%</p>
           <p class="text-sm text-gray-400">업로드: {{ new Date(item.created_at).toLocaleDateString() }}</p>
-          <p v-if="item.userOpinion" class="text-sm text-primary">사용자 의견: {{ item.userOpinion }}</p>
+          <p v-if="item.userOpinion" class="text-sm text-success">사용자 의견: {{ item.userOpinion }}</p>
           <button class="btn btn-sm btn-accent mt-2" @click="openOpinionModal(item)">의견 남기기</button>
           <button class="btn btn-sm btn-error mt-2" @click="deleteItem(item.id)">
             삭제
           </button>
-
         </div>
       </div>
     </div>
   </div>
+
   <OpinionModal ref="modalRef" :targetItem="selectedItem" @sent="fetchResults" />
+
   <!-- 페이지네이션 -->
   <div class="pagination mt-6 text-center" v-if="pagination && pagination.total > pagination.per_page">
     <div class="join">
@@ -43,8 +67,8 @@
       </button>
     </div>
   </div>
-
 </template>
+
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

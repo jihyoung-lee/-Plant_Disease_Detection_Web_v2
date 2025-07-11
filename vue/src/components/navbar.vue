@@ -14,18 +14,21 @@
     <div class="flex items-center gap-4">
       <SearchInput />
 
-      <div v-if="userStore.user">
-        <Modal />
-        <button class="btn" popovertarget="popover-1" style="anchor-name:--anchor-1">
+      <!-- 로그인 상태일 때 -->
+      <div v-if="userStore.user" class="dropdown dropdown-end">
+        <label tabindex="0" class="btn">
           {{ userStore.user.name }}
-        </button>
-        <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
-            popover id="popover-1" style="position-anchor:--anchor-1">
-          <router-link to="/logout" class="btn btn-sm">{{ $t('logout') }}</router-link>
+        </label>
+        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+          <li><router-link to="/list">{{ $t('analysis') }}</router-link></li>
+          <li><router-link to="/logout">{{ $t('logout') }}</router-link></li>
         </ul>
       </div>
 
-      <router-link v-else to="/login" class="btn btn-sm">{{ $t('login') }}</router-link>
+      <!-- 비로그인 -->
+      <router-link v-else to="/login" class="btn btn-sm">
+        {{ $t('login') }}
+      </router-link>
     </div>
   </div>
 </template>

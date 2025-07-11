@@ -52,5 +52,7 @@
   "register_email_p1": "Please enter the 6-digit verification code sent to your email",
   "register_email_resend": "Didn’t get the code? Resend",
   "register_email_resend_in": "Resend available in {seconds} seconds",
+
+  "analysis": "Analysis",
   "search": "search"
 }

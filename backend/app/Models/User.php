@@ -11,6 +11,9 @@ class User extends Authenticatable implements JWTSubject
         'name', 'email', 'password'
     ];
 
+    public function trains(){
+        return $this->hasMany(Train::class);
+    }
     // JWT 메서드
     public function getJWTIdentifier() {
         return $this->getKey();

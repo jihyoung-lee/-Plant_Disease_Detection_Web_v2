@@ -11,22 +11,38 @@ class ResultController extends Controller
 {
     public function index()
     {
-        $results = Train::latest()->paginate(6);
+        $user = auth()->user();
+
+        if(!$user){
+            return response()->json(['message'=>'Unauthorized'], 401);
+        }
+
+        $results = $user->trains()->latest()->paginate(6);
+
         return response()->json($results);
     }
 
     public function show($id)
     {
-        $result = Train::findOrFail($id);
+
+        $user = auth()->user();
+
+        $result = $user->trains()->find($id);
+
+        if (!$result) {
+            return response()->json(['error'=>'해당 결과를 찾을 수 없거나 권한이 없습니다'], 404);
+        }
         return response()->json($result);
     }
 
     public function destroy($id){
-        $photo = Train::find($id);
+
+        $user = auth()->user();
+        $photo = $user->trains()->find($id);
 
         if(!$photo)
         {
-            return response()->json(['error' => '사진을 찾을 수 없습니다'], 404);
+            return response()->json(['error' => '사진을 찾을 수 없거나 권한이 없습니다'], 404);
         }
 
         if(Storage::disk('public')->exists('images/' . $photo->url)) {

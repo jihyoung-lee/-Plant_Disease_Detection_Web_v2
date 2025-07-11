@@ -18,5 +18,10 @@ class Train extends Model
         'confidence',
         'userOpinion',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
 

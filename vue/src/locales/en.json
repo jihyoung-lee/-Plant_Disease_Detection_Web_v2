@@ -55,5 +55,10 @@
 
   "analysis": "Analysis",
   "reports": "Reports",
+
+  "analysis_h2": "No analysis results yet",
+  "analysis_p1": "Your results will appear here after uploading a photo.",
+  "analysis_btn1": "Upload a photo",
+
   "search": "search"
 }

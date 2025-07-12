@@ -56,5 +56,10 @@
 
   "analysis": "AI 진단",
   "reports": "진단 결과",
+
+  "analysis_h2": "아직 등록된 분석 결과가 없어요",
+  "analysis_p1": "사진을 업로드하면 분석 결과가 이곳에 보여집니다.",
+  "analysis_btn1": "사진 업로드하러 가기",
+
   "search": "검색"
 }

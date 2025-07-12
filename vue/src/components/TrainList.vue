@@ -18,10 +18,10 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 17v-6h6v6m2 4H7a2 2 0 01-2-2V7a2 2 0 012-2h3l2-2h2l2 2h3a2 2 0 012 2v12a2 2 0 01-2 2z" />
       </svg>
-      <h2 class="text-lg font-semibold text-success">아직 등록된 분석 결과가 없어요</h2>
-      <p class="text-sm mb-4 text-success">사진을 업로드하면 분석 결과가 이곳에 보여집니다.</p>
+      <h2 class="text-lg font-semibold text-success">{{ $t('analysis_h2') }}</h2>
+      <p class="text-sm mb-4 text-success">{{ $t('analysis_p1') }}</p>
       <button @click="openModal" class="btn btn-success btn-sm animate-bounce hover:scale-105 transition-transform duration-200">
-        사진 업로드하러 가기
+        {{ $t('analysis_btn1') }}
       </button>
     </div>
 

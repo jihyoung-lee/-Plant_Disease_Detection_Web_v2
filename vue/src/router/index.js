@@ -30,7 +30,7 @@ const routes = [
     {
         path: '/list',
         name: 'TrainList',
-        meta: { titleKey: 'meta_train_list' },
+        meta: { requiresAuth: true, titleKey: 'meta_train_list' },
         component: TrainList,
     },
     {
@@ -56,19 +56,27 @@ const router = createRouter({
     routes,
 })
 
-// 중복 로그인 방지 및 다국어 타이틀 적용
+// 중복 로그인 방지 및 다국어 타이틀 적용, 라우터 가드
 router.beforeEach((to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('token')
 
-    if (to.meta.guestOnly && isAuthenticated) {
-        next('/')
-    } else {
-        const titleKey = to.meta.titleKey
-        if (titleKey) {
-            document.title = i18n.global.t(titleKey)
-        }
-        next()
+    // 라우터 가드
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        return next( { name: 'Login' })
     }
+
+    // guest only
+    if (to.meta.guestOnly && isAuthenticated){
+        return next('/')
+    }
+
+    // 다국어 타이틀 처리
+    const titleKey = to.meta.titleKey
+    if (titleKey) {
+        document.title = i18n.global.t(titleKey)
+    }
+
+    next()
 })
 
 export default router

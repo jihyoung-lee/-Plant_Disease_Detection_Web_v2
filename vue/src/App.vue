@@ -5,6 +5,7 @@
     <div class="content">
       <navbar />
       <router-view />
+      <Modal ref="modalRef" />
       <Footer />
     </div>
 
@@ -16,7 +17,12 @@ import navbar from '@/components/navbar.vue'
 import bg1 from '@/assets/bg.png'
 import bg2 from '@/assets/hero-bg.png'
 import Footer from '@/components/Footer.vue'
-import Navbar from "@/components/navbar.vue";
+import Navbar from "@/components/navbar.vue"
+import Modal from "@/components/Modal.vue"
+import { ref, provide } from 'vue'
+
+const modalRef = ref(null)
+provide('aiModal', modalRef)
 </script>
 
 <style scoped>

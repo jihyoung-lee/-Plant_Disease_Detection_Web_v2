@@ -7,12 +7,18 @@
 
     <!-- 제목 -->
     <div class="flex-1">
-      <a class="btn btn-ghost text-xl">{{ route.meta.title || $t("title") }}</a>
+      <router-link to="/" class="btn btn-ghost text-xl">
+        {{ route.meta.title || $t("title") }}
+      </router-link>
     </div>
 
     <!-- 오른쪽 영역 -->
     <div class="flex items-center gap-4">
       <SearchInput />
+
+      <button class="btn btn-outline btn-accent" @click="openModal">
+        AI진단
+      </button>
 
       <!-- 로그인 상태일 때 -->
       <div v-if="userStore.user" class="dropdown dropdown-end">
@@ -37,13 +43,18 @@
 <script setup>
 import logo from '@/assets/farmer.svg'
 import SearchInput from "@/components/SearchInput.vue"
-import Modal from "@/components/Modal.vue"
 import { useRoute } from 'vue-router'
 import { onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { inject } from 'vue'
 
+const aiModal = inject('aiModal')
 const route = useRoute()
 const userStore = useUserStore()
+
+function openModal() {
+  aiModal?.value?.openModal()
+}
 
 onMounted(async () => {
   if (!userStore.token) {

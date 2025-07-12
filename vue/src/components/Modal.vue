@@ -1,7 +1,5 @@
 <template>
-  <button class="btn btn-outline btn-accent" onclick="my_modal_3.showModal()">AI진단</button>
-
-  <dialog id="my_modal_3" class="modal">
+  <dialog id="my_modal_3" class="modal" ref="dialogRef">
     <div class="modal-box">
       <form method="dialog">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -69,7 +67,15 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '@/lib/axios'
+
+const router = useRouter()
+const dialogRef = ref(null)
+
+defineExpose({
+  openModal
+})
 
 const services = ref([])
 const error = ref('')
@@ -84,6 +90,17 @@ const cropOptions = ref([
   { label: '복숭아', value: 'peach' },
   { label: '포도', value: 'grape' }
 ])
+
+function openModal() {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    alert('로그인이 필요합니다.')
+    router.push({ name: 'Login' }) // 로그인 페이지 이름으로 이동
+    return
+  }
+
+  dialogRef.value?.showModal()
+}
 
 function onFileChange(event) {
   photo.value = event.target.files[0]

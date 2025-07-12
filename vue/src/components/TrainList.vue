@@ -20,9 +20,9 @@
       </svg>
       <h2 class="text-lg font-semibold text-success">아직 등록된 분석 결과가 없어요</h2>
       <p class="text-sm mb-4 text-success">사진을 업로드하면 분석 결과가 이곳에 보여집니다.</p>
-      <router-link to="/upload" class="btn btn-success btn-sm animate-bounce hover:scale-105 transition-transform duration-200">
+      <button @click="openModal" class="btn btn-success btn-sm animate-bounce hover:scale-105 transition-transform duration-200">
         사진 업로드하러 가기
-      </router-link>
+      </button>
     </div>
 
     <!-- 데이터가 있을 때 -->
@@ -75,6 +75,13 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '@/lib/axios'
 import Loading from '@/components/Loading.vue'
 import OpinionModal from '@/components/OpinionModal.vue'
+import { inject } from 'vue'
+
+const aiModal = inject('aiModal')
+
+function openModal() {
+  aiModal?.value?.openModal()
+}
 
 const items = ref([])
 const pagination = ref(null)

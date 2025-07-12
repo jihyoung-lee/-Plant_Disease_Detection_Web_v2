@@ -80,7 +80,7 @@
         <p class="text-gray-300 mb-6">{{ $t('step_p1') }}</p>
         <button
             class="bg-white text-green-600 font-semibold py-3 px-6 rounded shadow hover:bg-green-100 transition mb-10 hover:scale-105"
-            @click="$router.push('/photo')"
+            @click="openModal"
         >
           {{ $t('step_bt1') }}
         </button>
@@ -102,6 +102,13 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { inject } from 'vue'
+
+const aiModal = inject('aiModal')
+
+function openModal() {
+  aiModal?.value?.openModal()
+}
 
 const { t } = useI18n()
 const farmerImage = new URL('../assets/bgimg.png', import.meta.url).href
@@ -128,13 +135,13 @@ const infos = [
     img: new URL('../assets/leaf.jpg', import.meta.url).href,
     titleKey: 'infos_1_title',
     textKey: 'infos_1_text',
-    link: '/photo'
+    link: '/list'
   },
   {
     img: new URL('../assets/fruit.jpg', import.meta.url).href,
     titleKey: 'infos_2_title',
     textKey: 'infos_2_text',
-    link: '/search'
+    link: '/disease-search'
   }
 ]
 

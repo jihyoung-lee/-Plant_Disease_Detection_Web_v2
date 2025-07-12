@@ -15,18 +15,14 @@
     <!-- 오른쪽 영역 -->
     <div class="flex items-center gap-4">
       <SearchInput />
-
-      <button class="btn btn-outline btn-accent" @click="openModal">
-        AI진단
-      </button>
-
       <!-- 로그인 상태일 때 -->
       <div v-if="userStore.user" class="dropdown dropdown-end">
         <label tabindex="0" class="btn">
           {{ userStore.user.name }}
         </label>
         <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-          <li><router-link to="/list">{{ $t('analysis') }}</router-link></li>
+          <li><button @click="openModal" >{{ $t('analysis') }}</button></li>
+          <li><router-link to="/list">{{ $t('reports') }}</router-link></li>
           <li><router-link to="/logout">{{ $t('logout') }}</router-link></li>
         </ul>
       </div>
@@ -35,6 +31,10 @@
       <router-link v-else to="/login" class="btn btn-sm">
         {{ $t('login') }}
       </router-link>
+      <select class="select select-bordered select-xs w-24" :value="locale" @change="changeLang">
+        <option value="ko">한국어</option>
+        <option value="en">English</option>
+      </select>
     </div>
   </div>
 </template>
@@ -48,12 +48,21 @@ import { onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { inject } from 'vue'
 
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
+
 const aiModal = inject('aiModal')
 const route = useRoute()
 const userStore = useUserStore()
 
 function openModal() {
   aiModal?.value?.openModal()
+}
+
+function changeLang(e) {
+  locale.value = e.target.value
+  localStorage.setItem('lang', e.target.value) // 새로고침에도 기억되게
 }
 
 onMounted(async () => {

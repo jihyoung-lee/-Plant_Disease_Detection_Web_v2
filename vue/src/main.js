@@ -12,6 +12,10 @@ axios.defaults.baseURL = 'http://127.0.0.1:8081'
 axios.defaults.withCredentials = true
 
 const pinia = createPinia()
+const savedLang = localStorage.getItem('lang')
+if (savedLang) {
+    i18n.global.locale.value = savedLang
+}
 
 createApp(App)
     .use(router)

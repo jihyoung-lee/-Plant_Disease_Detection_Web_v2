@@ -54,6 +54,7 @@
   "register_email_resend": "인증번호 다시 받기",
   "register_email_resend_in": "{seconds}초 후 재전송 가능",
 
-  "analysis": "분석 결과",
+  "analysis": "AI 진단",
+  "reports": "진단 결과",
   "search": "검색"
 }

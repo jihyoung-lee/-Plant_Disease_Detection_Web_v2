@@ -54,5 +54,6 @@
   "register_email_resend_in": "Resend available in {seconds} seconds",
 
   "analysis": "Analysis",
+  "reports": "Reports",
   "search": "search"
 }

@@ -134,7 +134,7 @@ import { useRoute, useRouter } from 'vue-router';
 
     function goToPage(page) {
       router.push({
-        path: '/disease-search',
+        path: route.path,
         query: {
           ...route.query,
           page,

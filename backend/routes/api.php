@@ -50,7 +50,7 @@ Route::prefix('predict')->middleware('auth:api')->group(function () {
 });
 
 Route::get('/disease-info', [SearchController::class, 'infoApi']);
-Route::get('/disease-search', [SearchController::class, 'diseaseListApi']);
+Route::get('/disease', [SearchController::class, 'diseaseListApi']);
 Route::get('/cache-test', function () {
     Cache::put('greeting', '안녕, 라라독 Redis!', now()->addMinutes(10));
     return [

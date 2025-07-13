@@ -62,7 +62,7 @@ const handleLogin = async () => {
     setAuthToken(token)  // axios 헤더 + localStorage 저장
 
     // 로그인 성공 후
-    userStore.setUser(response.data.user, response.data.token)
+    userStore.setUser(res.data.user, res.data.token)
 
     router.push('/list')     // 홈이나 원하는 페이지로 이동
   } catch (err) {

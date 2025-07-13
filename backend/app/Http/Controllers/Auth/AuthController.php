@@ -12,7 +12,6 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        \Log::info('요청 받은 값:', ['data' => $request->all()]);
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',

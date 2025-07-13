@@ -58,14 +58,7 @@ Route::get('/cache-test', function () {
         'value' => Cache::get('greeting'),
     ];
 });
-Route::get('/debug-token', function (Request $request) {
-    try {
-        $user = JWTAuth::parseToken()->authenticate();
-        return response()->json($user);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 401);
-    }
-});
-Route::options('/test-cors', function () {
-    return response()->json(['message' => 'OK']);
-});
+
+Route::get('/csrf-token', function () {
+    return response()->json(['csrf_token' => csrf_token()]);
+})->middleware('web'); // 꼭 web 미들웨어!

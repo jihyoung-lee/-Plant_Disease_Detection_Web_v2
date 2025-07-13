@@ -30,9 +30,25 @@ class LoginController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
-    public function me()
+    public function me(Request $request)
     {
-        return response()->json(auth('api')->user());
+        $user = auth('api')->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        if (App::environment('production')) {
+            return response()->json([
+                'message' => 'User info retrieved successfully',
+                'user' => $user
+            ]);
+        } else {
+            return response()->json([
+                'user' => $user,
+                'token' => $request->bearerToken(),
+            ]);
+        }
     }
 
     protected function respondWithToken($token)

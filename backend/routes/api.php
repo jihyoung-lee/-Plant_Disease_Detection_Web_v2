@@ -61,4 +61,4 @@ Route::get('/cache-test', function () {
 
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
-})->middleware('web'); // 꼭 web 미들웨어!
+})->middleware('web');

@@ -1,49 +1,34 @@
-// axios.js
 import axios from 'axios';
 
-const token = localStorage.getItem('token'); // 저장한 토큰 불러오기
+const isProd = import.meta.env.MODE === 'production'
 
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8081/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-       // 'Authorization': `Bearer ${token}`,
     },
-    withCredentials: true,
+    withCredentials: isProd, // 운영환경일때 쿠키 전송
 });
-export function setAuthToken(token) {
-    if (token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
-        localStorage.setItem('token', token)
-    } else {
-        delete api.defaults.headers.common['Authorization']
-        localStorage.removeItem('token')
+
+// 개발환경일 때만 Authorization 헤더 적용
+if (!isProd) {
+    const savedToken = localStorage.getItem('token')
+    if (savedToken) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`
     }
 }
 
-// 초기화용
-const savedToken = localStorage.getItem('token')
-if (savedToken) {
-    setAuthToken(savedToken)
+// 개발환경에서 로그인 시 토큰 저장 함수
+export function setAuthToken(token) {
+    if (!isProd) {
+        if (token) {
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+            localStorage.setItem('token', token)
+        } else {
+            delete api.defaults.headers.common['Authorization']
+            localStorage.removeItem('token')
+        }
+    }
 }
 export default api
-/*
-// 이거 추가 (✅ export)
-export function setAuthToken(token) {
-    if (token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        localStorage.setItem('token', token);
-    } else {
-        delete api.defaults.headers.common['Authorization'];
-        localStorage.removeItem('token');
-    }
-}
-
-// 초기화용
-const savedToken = localStorage.getItem('token');
-if (savedToken) setAuthToken(savedToken);
-
-// ✅ 반드시 api도 export
-export default api;
- */

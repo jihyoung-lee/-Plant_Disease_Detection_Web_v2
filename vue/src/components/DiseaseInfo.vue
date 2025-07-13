@@ -6,14 +6,15 @@
         <thead>
         <tr>
           <td>피해 사진</td>
-          <td v-for="item in services">
-            <img
-                v-if="item.imageList[0].image"
-                :src="item.imageList[0].image"
-                alt="이미지"
-                class="w-[300px] h-[300px] object-contain"
-            />
-          </td>
+          <template v-for="item in services">
+            <td v-if="item.imageList && item.imageList.length > 0 && item.imageList[0].image">
+              <img
+                  :src="item.imageList[0].image"
+                  alt="이미지"
+                  class="w-[300px] h-[300px] object-contain"
+              />
+            </td>
+          </template>
         </tr>
         </thead>
         <tbody>
@@ -29,7 +30,9 @@
       </table>
       <div v-for="(item, index) in services" :key="index">
         <!-- 증상 -->
-        <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
+        <div
+            v-if="item.symptoms"
+            class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
           <input type="checkbox" />
           <div class="collapse-title font-semibold">증상</div>
           <div class="collapse-content">
@@ -38,7 +41,9 @@
         </div>
 
         <!-- 발생 생태 -->
-        <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
+        <div
+            v-if="item.developmentCondition"
+            class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
           <input type="checkbox" />
           <div class="collapse-title font-semibold">발생 생태</div>
           <div class="collapse-content">
@@ -47,7 +52,9 @@
         </div>
 
         <!-- 방제 방법 -->
-        <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
+        <div
+            v-if="item.preventionMethod"
+            class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box mb-2">
           <input type="checkbox" />
           <div class="collapse-title font-semibold">방제 방법</div>
           <div class="collapse-content">

@@ -10,8 +10,6 @@ php artisan config:cache || true
 php artisan route:cache || true
 php artisan view:cache || true
 
-# 마이그레이션
-php artisan migrate || true
 
 echo "🚀 Laravel 서버 실행 중..."
 exec php artisan serve --host=0.0.0.0 --port=8000

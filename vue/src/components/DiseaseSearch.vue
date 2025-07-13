@@ -96,7 +96,7 @@ import { useRoute, useRouter } from 'vue-router';
         search = '사과';
         // URL 업데이트 (히스토리에 남기지 않음)
         router.replace({
-          path: '/disease',
+          path: '/disease-search',
           query: {
             ...route.query,
             search: '사과'

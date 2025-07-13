@@ -132,6 +132,10 @@ return [
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
+            'scheme' => env('REDIS_SCHEME', 'tcp'),
+            'ssl' => [
+                'verify_peer' => false, // 필요 시 true로
+            ],
         ],
 
         'cache' => [

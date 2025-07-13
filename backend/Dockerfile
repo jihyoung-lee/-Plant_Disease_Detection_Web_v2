@@ -26,6 +26,11 @@ RUN composer install --no-dev --optimize-autoloader && \
     php artisan key:generate && \
     php artisan config:cache
 
+# 캐시
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache \
+
 # 포트 설정
 EXPOSE 8000
 

@@ -8,7 +8,7 @@ import './assets/tailwind.css'
 import i18n from './i18n.js'
 import GoogleLogin from 'vue3-google-login'
 
-axios.defaults.baseURL = 'http://127.0.0.1:8081'
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL
 axios.defaults.withCredentials = true
 
 const pinia = createPinia()

@@ -6,10 +6,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
-        "ext-simplexml": "*",
         "ext-redis": "*",
+        "ext-simplexml": "*",
         "google/apiclient": "^2.18",
-        "guzzlehttp/guzzle": "^7.0.1",
+        "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^10.0",
         "laravel/socialite": "^5.21",
         "laravel/tinker": "^2.8",

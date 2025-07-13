@@ -59,6 +59,10 @@ Route::get('/cache-test', function () {
     ];
 });
 
+Route::get('/ping', function () {
+    return response()->json(['status' => 'ok']);
+});
+
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 })->middleware('web');

@@ -1,7 +1,9 @@
 <template>
   <div class="content-area">
     <h2 class="text-2xl font-semibold mb-4">검색 결과</h2>
-    <table border="1" class="w-full">
+
+    <!-- PC 화면 테이블 -->
+    <table border="1" class="hidden sm:table w-full">
       <thead>
       <tr>
         <th>사진</th>
@@ -44,7 +46,30 @@
       </tr>
       </tbody>
     </table>
-
+    <!-- 모바일용 카드 -->
+    <div class="sm:hidden space-y-4">
+      <div
+          v-for="(item, index) in items"
+          :key="'mobile-' + index"
+          class="bg-white shadow rounded p-4 flex items-center gap-4"
+      >
+        <img
+            v-if="item.oriImg"
+            :src="item.oriImg"
+            alt="이미지"
+            class="w-16 h-16 object-contain rounded"
+        />
+        <div>
+          <p class="text-sm text-gray-500">작물: {{ item.cropName }}</p>
+          <router-link
+              class="text-green-700 font-semibold"
+              :to="`/disease/${encodeURIComponent(item.cropName)}/${encodeURIComponent(item.sickNameKor)}`"
+          >
+            병명: {{ item.sickNameKor }}
+          </router-link>
+        </div>
+      </div>
+    </div>
     <p v-if="error" style="color:red;">{{ error }}</p>
 
     <div class="pagination" v-if="pagination && pagination.total > pagination.per_page">

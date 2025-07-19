@@ -6,51 +6,64 @@ use App\Http\Controllers\Controller;
 use App\Models\Train;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ResultController extends Controller
 {
+    // ✅ 결과 목록 조회
     public function index()
     {
         $user = auth()->user();
-
-        if(!$user){
-            return response()->json(['message'=>'Unauthorized'], 401);
-        }
 
         $results = $user->trains()->latest()->paginate(6);
 
         return response()->json($results);
     }
 
+    // ✅ 단일 결과 상세 조회
     public function show($id)
     {
-
         $user = auth()->user();
 
         $result = $user->trains()->find($id);
 
         if (!$result) {
-            return response()->json(['error'=>'해당 결과를 찾을 수 없거나 권한이 없습니다'], 404);
+            return response()->json([
+                'error' => '해당 결과를 찾을 수 없거나 권한이 없습니다.'
+            ], 404);
         }
+
         return response()->json($result);
     }
 
-    public function destroy($id){
-
+    // ✅ 결과 삭제
+    public function destroy($id)
+    {
         $user = auth()->user();
-        $photo = $user->trains()->find($id);
+        $result = $user->trains()->find($id);
 
-        if(!$photo)
-        {
-            return response()->json(['error' => '사진을 찾을 수 없거나 권한이 없습니다'], 404);
+        if (!$result) {
+            return response()->json([
+                'error' => '해당 결과를 찾을 수 없거나 권한이 없습니다.'
+            ], 404);
         }
 
-        if(Storage::disk('public')->exists('images/' . $photo->url)) {
-            Storage::disk('public')->delete('images/' . $photo->url);
+        // 이미지 파일 삭제 (있는 경우)
+        if ($result->url && Storage::disk('public')->exists('images/' . $result->url)) {
+            try {
+                Storage::disk('public')->delete('images/' . $result->url);
+            } catch (\Exception $e) {
+                Log::warning('이미지 삭제 실패', [
+                    'file' => $result->url,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
-        //DB delete
-        $photo->delete();
 
-        return response()->json(['message' => '삭제 완료'], 200);
+        $result->delete();
+
+        return response()->json([
+            'message' => '삭제 완료'
+        ], 200);
     }
 }

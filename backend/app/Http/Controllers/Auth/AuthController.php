@@ -31,7 +31,7 @@ class AuthController extends Controller
                 'user' => $user
             ], 201);
 
-        } catch (QueryException $e) {
+        } catch (\Exception $e) {
             Log::error('회원가입 실패: ' . $e->getMessage());
 
             return response()->json([

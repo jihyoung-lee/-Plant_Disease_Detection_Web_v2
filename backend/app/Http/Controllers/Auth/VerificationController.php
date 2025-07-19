@@ -51,6 +51,7 @@ class VerificationController extends Controller
 
     public function resend(Request $request)
     {
+        try{
         $validated = $request->validate([
             'email' => 'required|email|max:255',
             'name' => 'required|string|max:255',
@@ -61,6 +62,16 @@ class VerificationController extends Controller
         return response()->json([
             'message' => '새 인증코드가 전송되었습니다.'
         ]);
+        }catch (\Exception $e){
+            Log::error('인증번호 전송 실패: ' . $e->getMessage(), [
+                'email' => $request->input('email'),
+                'error' => $e->getTrace()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => '인증번호 전송에 실패했습니다. 잠시 후 다시 시도해주세요.'
+            ], 500);
+        }
     }
 
     public function verify(Request $request)

@@ -7,6 +7,7 @@ use App\Models\Train;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use function Symfony\Component\Translation\t;
 
 class PredictController extends Controller
 {
@@ -59,13 +60,25 @@ class PredictController extends Controller
             'sickNameKor' => 'required|string',
         ]);
 
+
         $userOpinion = $request->cropName . '_' . $request->sickNameKor;
 
-        $train = Train::findOrFail($id);
-        $train->userOpinion = $userOpinion;
-        $train->save();
+        try {
+            $train = Train::findOrFail($id);
+            $train->userOpinion = $userOpinion;
+            $train->save();
 
-        return response()->json(['message' => '의견이 반영되었습니다']);
+            return response()->json(['message' => '의견이 반영되었습니다'], 201);
+        } catch (\Exception $e) {
+            Log::error('의견 전송 실패: ' . $e->getMessage(), [
+                'error' => $e->getTrace()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => '의견 전송에 실패했습니다. 잠시 후 다시 시도해주세요.'
+            ], 500);
+        }
+
     }
 
     protected function fileUpload($modelUrl, $photoFile, Request $request): array

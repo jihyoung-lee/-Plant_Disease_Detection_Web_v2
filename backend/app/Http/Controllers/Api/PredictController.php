@@ -71,7 +71,7 @@ class PredictController extends Controller
             return response()->json(['message' => '의견이 반영되었습니다'], 201);
         } catch (\Exception $e) {
             Log::error('의견 전송 실패: ' . $e->getMessage(), [
-                'error' => $e->getTrace()
+                'error' => $e->getMessage()
             ]);
             return response()->json([
                 'success' => false,
@@ -81,46 +81,53 @@ class PredictController extends Controller
 
     }
 
-    protected function fileUpload($modelUrl, $photoFile, Request $request): array
+    protected function fileUpload(string $modelUrl, $photoFile, Request $request): array
     {
-        $url = $modelUrl;
-
         $inputCropName = $request->input('cropName');
 
-        // 이미지와 crop 파라미터 함께 전송
-        $response = Http::attach(
-            'image',
-            file_get_contents($photoFile),
-            $photoFile->getClientOriginalName()
-        )->post($url, [
-            'cropName' => $inputCropName
-        ]);
+        try {
+            // FastAPI로 이미지와 cropName 함께 전송
+            $response = Http::attach(
+                'image',
+                file_get_contents($photoFile),
+                $photoFile->getClientOriginalName()
+            )->post($modelUrl, [
+                'cropName' => $inputCropName
+            ]);
 
-        if ($response->failed()) {
-            throw new \Exception("API 응답 오류");
+            if ($response->failed()) {
+                throw new \Exception("AI 분석 서버로부터 실패 응답을 받았습니다.");
+            }
+
+            // FastAPI 응답 파싱
+            $predictedCropName = $response->json('cropName') ?? '알수없음';
+            $sickNameKor = $response->json('sickNameKor') ?? '알수없음';
+            $confidence = $response->json('confidence') ?? 0;
+
+            // 고유한 해시 파일명 생성 및 저장
+            $hashname = $photoFile->hashName();
+            $path = $photoFile->storeAs('images', $hashname, 'public');
+
+            return [$predictedCropName, $sickNameKor, $confidence, $path];
+
+        } catch (\Exception $e) {
+            throw new \Exception("fileUpload 실패: " . $e->getMessage(), 500);
         }
-        // FastAPI 응답 값에서 추출
-        $predictedCropName = $response->json('cropName') ?? 'x';
-        $sickNameKor = $response->json('sickNameKor') ?? 'x';
-        $confidence = $response->json('confidence') ?? 0;
-
-        $hashname = $photoFile->hashName(); // 고유 파일명
-        $path = $photoFile->storeAs('images', $hashname, 'public');
-
-        return [$predictedCropName, $sickNameKor, $confidence, $path];
     }
+
 
     protected function storePhoto($path, $hashname, Request $request, $cropName, $sickNameKor, $confidence)
     {
-        return Train::create([
-            #'url' => Storage::disk('s3')->url($path),
-            'url' => Storage::disk('public')->url($path), // public/storage/images/xxx.jpg
-            'hashname' => $hashname,
-            'originalname' => $request->file('image')->getClientOriginalName(),
-            'cropName' => $cropName,
-            'sickNameKor' => $sickNameKor,
-            'confidence' => $confidence,
-        ]);
+            return Train::create([
+                #'url' => Storage::disk('s3')->url($path),
+                'url' => Storage::disk('public')->url($path), // public/storage/images/xxx.jpg
+                'hashname' => $hashname,
+                'originalname' => $request->file('image')->getClientOriginalName(),
+                'cropName' => $cropName,
+                'sickNameKor' => $sickNameKor,
+                'confidence' => $confidence,
+            ]);
+
     }
 
     protected function createDataFromExisting($existingTrain, $hashname)
@@ -137,13 +144,15 @@ class PredictController extends Controller
 
     protected function validateDuplicatePhoto(Request $request): array
     {
-        $hashname = md5_file($request->file('image')->getRealPath());
-
-        $existingTrain = Train::where('hashname', $hashname)->latest()->first();
-
         $validatedData = $request->validate([
             'image' => 'required|mimes:jpeg,bmp,png,jpg'
         ]);
+
+        $hashname = md5_file($validatedData['image']->getRealPath());
+
+        $existingTrain = Train::where('hashname', $hashname)->latest()->first();
+
+
 
         return [$hashname, $existingTrain, $validatedData];
     }

@@ -27,7 +27,9 @@ class VerificationController extends Controller
 
         try {
             if (User::where('email', $validated['email'])->exists()) {
-                return response()->json(['message' => '이미 사용 중인 이메일입니다.'], 422);
+                return response()->json([
+                    'success' => false,
+                    'message' => '이미 사용 중인 이메일입니다.'], 422);
             }
 
             $this->verification->generateCodeAndSend($validated['email'], $validated['name']);
@@ -38,6 +40,7 @@ class VerificationController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('인증번호 전송 실패: ' . $e->getMessage(), [
+                'success' => false,
                 'email' => $validated['email'],
                 'error' => $e->getMessage()
             ]);
@@ -60,10 +63,12 @@ class VerificationController extends Controller
         $this->verification->generateCodeAndSend($validated['email'], $validated['name']);
 
         return response()->json([
+            'success' => true,
             'message' => '새 인증코드가 전송되었습니다.'
         ]);
         }catch (\Exception $e){
             Log::error('인증번호 전송 실패: ' . $e->getMessage(), [
+                'success' => false,
                 'email' => $request->input('email'),
                 'error' => $e->getMessage()
             ]);
@@ -84,10 +89,13 @@ class VerificationController extends Controller
         $isValid = $this->verification->verifyCode($validated['email'], $validated['code']);
 
         if (!$isValid) {
-            return response()->json(['message' => '인증코드가 올바르지 않거나 만료되었습니다.'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => '인증코드가 올바르지 않거나 만료되었습니다.'], 400);
         }
 
         return response()->json([
+            'success' => true,
             'message' => '이메일 인증이 완료되었습니다.'
         ]);
     }
@@ -101,18 +109,19 @@ class VerificationController extends Controller
         $cacheKey = 'email_check:' . md5($validated['email']);
 
         if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey);
+            return response()->json(Cache::get($cacheKey), 200);
         }
 
         $exists = User::where('email', $validated['email'])->exists();
 
         $response = [
+            'success' => true,
             'exists' => $exists,
             'message' => $exists ? '이미 사용 중인 이메일입니다' : '사용 가능한 이메일입니다',
         ];
 
         Cache::put($cacheKey, $response, now()->addSeconds(10));
 
-        return response()->json($response);
+        return response()->json($response, 200);
     }
 }

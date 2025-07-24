@@ -39,7 +39,7 @@ class VerificationController extends Controller
         } catch (\Exception $e) {
             Log::error('인증번호 전송 실패: ' . $e->getMessage(), [
                 'email' => $validated['email'],
-                'error' => $e->getTrace()
+                'error' => $e->getMessage()
             ]);
 
             return response()->json([
@@ -65,7 +65,7 @@ class VerificationController extends Controller
         }catch (\Exception $e){
             Log::error('인증번호 전송 실패: ' . $e->getMessage(), [
                 'email' => $request->input('email'),
-                'error' => $e->getTrace()
+                'error' => $e->getMessage()
             ]);
             return response()->json([
                 'success' => false,

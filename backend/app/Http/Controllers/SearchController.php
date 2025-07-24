@@ -137,24 +137,37 @@ class SearchController extends Controller
 
         throw new \Exception("API 응답 형식을 인식할 수 없습니다: " . mb_substr($body, 0, 100));
     }
-
     public static function getSickKey(string $cropName, string $sickNameKor): ?string
     {
-        $response = self::callApi([
-            'serviceCode' => 'SVC01',
-            'serviceType' => 'AA001:JSON',
-            'cropName' => $cropName,
-            'sickNameKor' => $sickNameKor,
-        ]);
+        try {
+            $response = self::callApi([
+                'serviceCode' => 'SVC01',
+                'serviceType' => 'AA001:JSON',
+                'cropName' => $cropName,
+                'sickNameKor' => $sickNameKor,
+            ]);
 
-        if (
-            !is_array($response['service']['list']) ||
-            empty($response['service']['list'])
-        ) {
+            $list = $response['service']['list'] ?? null;
+
+            if (!is_array($list) || empty($list)) {
+                Log::warning('getSickKey: 질병 정보 없음', [
+                    'cropName' => $cropName,
+                    'sickNameKor' => $sickNameKor,
+                    'rawResponse' => $response
+                ]);
+                return null;
+            }
+
+            return $list[0]['sickKey'] ?? null;
+
+        } catch (\Exception $e) {
+            Log::error('getSickKey 호출 실패', [
+                'cropName' => $cropName,
+                'sickNameKor' => $sickNameKor,
+                'error' => $e->getMessage()
+            ]);
             return null;
         }
-
-        return $response['service']['list'][0]['sickKey'] ?? null;
     }
 
     public static function info(string $cropName, string $sickNameKor)

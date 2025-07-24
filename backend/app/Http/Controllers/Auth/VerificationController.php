@@ -106,7 +106,7 @@ class VerificationController extends Controller
             'email' => 'required|email:rfc,dns|max:255'
         ]);
 
-        $cacheKey = 'email_check:' . md5($validated['email']);
+        $cacheKey = 'email_check:' . sha1($validated['email']);
 
         if (Cache::has($cacheKey)) {
             return response()->json(Cache::get($cacheKey), 200);

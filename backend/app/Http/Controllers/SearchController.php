@@ -79,33 +79,37 @@ class SearchController extends Controller
         $cropName = $request->input('cropName');
         $sickNameKor = $request->input('sickNameKor');
 
+        if (!$cropName || !$sickNameKor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'cropName과 sickNameKor는 필수 항목입니다.',
+            ], 422);
+        }
+
         $encodedCropName = urlencode($cropName);
-        $encodedSickNameKro = urlencode($sickNameKor);
-        $cacheKey = "disease_info:{$encodedCropName}:{$encodedSickNameKro}";
+        $encodedSickNameKor = urlencode($sickNameKor);
+        $cacheKey = "disease_info:{$encodedCropName}:{$encodedSickNameKor}";
 
         try {
             $response = Cache::remember($cacheKey, now()->addHours(6), function () use ($cropName, $sickNameKor) {
-                return self::info($cropName, $sickNameKor);
+                return self::info($cropName, $sickNameKor);  // 배열 반환됨
             });
 
-            if (is_object($response) && method_exists($response, 'toArray')) {
-                $response = $response->toArray();
-            } elseif ($response instanceof \JsonSerializable) {
-                $response = json_decode(json_encode($response), true);
-            }
-
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'cropName' => $cropName,
+                    'sickNameKor' => $sickNameKor,
+                    'raw' => $response
+                ]
+            ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'API 호출 실패',
-                'message' => $e->getMessage(),
+                'success' => false,
+                'message' => '질병 정보 조회 중 오류가 발생했습니다.',
+                'error' => $e->getMessage()
             ], 500);
         }
-
-        return response()->json([
-            'cropName' => $cropName,
-            'sickNameKor' => $sickNameKor,
-            'raw' => json_decode(json_encode($response), true)
-        ]);
     }
 
     public static function callApi(array $params = [])

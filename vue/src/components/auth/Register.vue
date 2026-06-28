@@ -18,9 +18,9 @@
             />
             <!-- 상태 아이콘 -->
             <span v-if="emailStatus === 'checking'" class="absolute right-3 top-1/2 -translate-y-1/2 loading loading-spinner loading-xs"></span>
-            <span v-if="emailStatus === 'invalid'" class="absolute right-3 top-1/2 -translate-y-1/2 text-error">✗</span>
-            <span v-if="emailStatus === 'duplicate'" class="absolute right-3 top-1/2 -translate-y-1/2 text-error">✗</span>
-            <span v-if="emailStatus === 'valid'" class="absolute right-3 top-1/2 -translate-y-1/2 text-success">✓</span>
+            <span v-if="emailStatus === 'invalid'" class="absolute right-3 top-1/2 -translate-y-1/2 text-error">X</span>
+            <span v-if="emailStatus === 'duplicate'" class="absolute right-3 top-1/2 -translate-y-1/2 text-error">X</span>
+            <span v-if="emailStatus === 'valid'" class="absolute right-3 top-1/2 -translate-y-1/2 text-success">OK</span>
           </div>
 
           <button type="submit" class="btn btn-success w-24 shrink-0" :disabled="emailStatus !== 'valid' || loading">

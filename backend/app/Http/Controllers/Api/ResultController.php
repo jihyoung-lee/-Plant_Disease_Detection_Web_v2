@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class ResultController extends Controller
 {
-    // ✅ 결과 목록 조회
+    // 결과 목록 조회
     public function index()
     {
         $user = auth()->user();
@@ -20,7 +20,7 @@ class ResultController extends Controller
         return response()->json($results);
     }
 
-    // ✅ 단일 결과 상세 조회
+    // 단일 결과 상세 조회
     public function show($id)
     {
         $user = auth()->user();
@@ -36,7 +36,7 @@ class ResultController extends Controller
         return response()->json($result);
     }
 
-    // ✅ 결과 삭제
+    // 결과 삭제
     public function destroy($id)
     {
         $user = auth()->user();

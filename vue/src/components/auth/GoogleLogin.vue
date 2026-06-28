@@ -28,11 +28,11 @@ const onSuccess = async (res) => {
     userStore.setUser(user, jwt)  // pinia에 저장
     router.push('/')
   } catch (err) {
-    console.error('🔴 백엔드 로그인 실패:', err.response?.data || err.message)
+    console.error('백엔드 로그인 실패:', err.response?.data || err.message)
   }
 }
 
 const onError = () => {
-  console.error('❌ 구글 로그인 실패')
+  console.error('구글 로그인 실패')
 }
 </script>

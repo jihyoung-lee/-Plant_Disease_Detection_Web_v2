@@ -2,7 +2,7 @@
   <dialog id="my_modal_3" class="modal" ref="dialogRef">
     <div class="modal-box">
       <form method="dialog">
-        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">X</button>
       </form>
 
       <h3 class="text-lg font-bold">AI 병해 진단 서비스</h3>

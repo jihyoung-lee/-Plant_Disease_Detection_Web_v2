@@ -17,7 +17,7 @@ This project is a web-based crop disease search system, built with a **fully dec
 
 ---
 
-## ⚐ Architecture
+## Architecture
 
 * The frontend (Vue) and backend (Laravel) are **completely separated**.
 * The frontend communicates with the backend via **RESTful API calls**.
@@ -26,7 +26,7 @@ This project is a web-based crop disease search system, built with a **fully dec
 
 ---
 
-## ⚡ Performance Optimization
+## Performance Optimization
 
 * All external API responses are cached using **Redis**.
 * Cached data is stored for **6 hours**.
@@ -35,7 +35,7 @@ This project is a web-based crop disease search system, built with a **fully dec
 
 ---
 
-## 🤩 Redis Cache Key Structure
+## Redis Cache Key Structure
 
 * Disease list cache:
 
@@ -51,7 +51,7 @@ This project is a web-based crop disease search system, built with a **fully dec
 
 ---
 
-## 🎇 Example API Response
+## Example API Response
 
 **GET** `/api/diseases?type=1&search=사과&page=1`
 
@@ -75,7 +75,7 @@ This project is a web-based crop disease search system, built with a **fully dec
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Role         | Tech                    |
 | ------------ | ----------------------- |
@@ -87,7 +87,7 @@ This project is a web-based crop disease search system, built with a **fully dec
 
 ---
 
-## 🔧 .env Sample (Backend)
+## .env Sample (Backend)
 
 ```env
 APP_NAME=Laravel

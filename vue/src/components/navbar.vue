@@ -67,12 +67,12 @@ function changeLang(e) {
 
 onMounted(async () => {
   if (!userStore.token) {
-    console.warn('🔴 토큰 없음')
+    console.warn('토큰 없음')
     return
   }
 
   if (!userStore.user) {
-    await userStore.fetchUser() // ✅ store에서 사용자 정보 불러오기
+    await userStore.fetchUser() // store에서 사용자 정보 불러오기
   }
 })
 </script>

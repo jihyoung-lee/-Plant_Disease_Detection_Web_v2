@@ -32,9 +32,9 @@ export const useUserStore = defineStore('user', {
                 setAuthToken(this.token)
                 const res = await api.get('/me')
                 this.user = res.data
-                console.log('🟢 사용자 정보 가져오기 성공:', this.user)
+                console.log('사용자 정보 가져오기 성공:', this.user)
             } catch (err) {
-                console.error('🔴 사용자 정보 가져오기 실패:', err?.response?.data || err.message)
+                console.error('사용자 정보 가져오기 실패:', err?.response?.data || err.message)
                 this.clearUser()
             }
         }

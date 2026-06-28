@@ -22,7 +22,7 @@ class GoogleLoginController extends Controller
         $response = Http::get($verifyUrl);
 
         if (!$response->ok()) {
-            Log::error('❌ ID 토큰 검증 실패: ' . $response->body());
+            Log::error('ID 토큰 검증 실패: ' . $response->body());
             return response()->json(['error' => 'Invalid Google token'], 401);
         }
 

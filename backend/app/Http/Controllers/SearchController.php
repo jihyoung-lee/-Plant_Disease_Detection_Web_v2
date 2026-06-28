@@ -19,7 +19,7 @@ class SearchController extends Controller
         $encodedSearch = urlencode($search);
         $cacheKey = "disease_list_{$searchType}_{$encodedSearch}";
 
-        Log::info("🧩 요청 들어옴", [
+        Log::info("요청 들어옴", [
             'cacheKey' => $cacheKey,
             'page' => $page,
             'search' => $search,
@@ -27,7 +27,7 @@ class SearchController extends Controller
         ]);
 
         $items = Cache::remember($cacheKey, now()->addHours(6), function () use ($searchType, $search) {
-            Log::info("🌀 캐시 MISS → API 호출 시작", [
+            Log::info("캐시 MISS → API 호출 시작", [
                 'searchType' => $searchType,
                 'search' => $search
             ]);
@@ -47,14 +47,14 @@ class SearchController extends Controller
 
             $response = self::callApi($params);
 
-            Log::info("✅ API 응답 완료", [
+            Log::info("API 응답 완료", [
                 '결과수' => count($response['service']['list'] ?? [])
             ]);
 
             return $response['service']['list'] ?? [];
         });
 
-        Log::info("📦 캐시 HIT 또는 저장됨", [
+        Log::info("캐시 HIT 또는 저장됨", [
             'cacheKey' => $cacheKey,
             '총개수' => count($items)
         ]);

@@ -5,56 +5,61 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Train;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ResultController extends Controller
 {
-    // 결과 목록 조회
-    public function index()
+    public function index(Request $request)
     {
-        $user = auth()->user();
+        $results = $request->user()
+            ->trains()
+            ->with('predictionCache')
+            ->latest()
+            ->paginate(6);
 
-        $results = $user->trains()->latest()->paginate(6);
+        $results->getCollection()->transform(
+            fn (Train $train) => $this->serializeTrain($train)
+        );
 
         return response()->json($results);
     }
 
-    // 단일 결과 상세 조회
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $user = auth()->user();
-
-        $result = $user->trains()->find($id);
+        $result = $request->user()
+            ->trains()
+            ->with('predictionCache')
+            ->find($id);
 
         if (!$result) {
             return response()->json([
-                'error' => '해당 결과를 찾을 수 없거나 권한이 없습니다.'
+                'error' => '해당 결과를 찾을 수 없거나 권한이 없습니다.',
             ], 404);
         }
 
-        return response()->json($result);
+        return response()->json($this->serializeTrain($result));
     }
 
-    // 결과 삭제
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $user = auth()->user();
-        $result = $user->trains()->find($id);
+        $result = $request->user()->trains()->find($id);
 
         if (!$result) {
             return response()->json([
-                'error' => '해당 결과를 찾을 수 없거나 권한이 없습니다.'
+                'error' => '해당 결과를 찾을 수 없거나 권한이 없습니다.',
             ], 404);
         }
 
-        // 이미지 파일 삭제 (있는 경우)
-        if ($result->url && Storage::disk('public')->exists('images/' . $result->url)) {
+        $storagePath = $this->storagePathFromUrl($result->url);
+
+        if ($storagePath && Storage::disk('public')->exists($storagePath)) {
             try {
-                Storage::disk('public')->delete('images/' . $result->url);
-            } catch (\Exception $e) {
+                Storage::disk('public')->delete($storagePath);
+            } catch (Throwable $e) {
                 Log::warning('이미지 삭제 실패', [
-                    'file' => $result->url,
+                    'file' => $storagePath,
                     'error' => $e->getMessage(),
                 ]);
             }
@@ -62,8 +67,46 @@ class ResultController extends Controller
 
         $result->delete();
 
-        return response()->json([
-            'message' => '삭제 완료'
-        ], 200);
+        return response()->json(['message' => '삭제 완료']);
+    }
+
+    protected function storagePathFromUrl(?string $url): ?string
+    {
+        if (!$url) {
+            return null;
+        }
+
+        $path = parse_url($url, PHP_URL_PATH);
+
+        if (!is_string($path)) {
+            return null;
+        }
+
+        $marker = '/storage/';
+        $position = strpos($path, $marker);
+
+        if ($position === false) {
+            return null;
+        }
+
+        return ltrim(substr($path, $position + strlen($marker)), '/');
+    }
+
+    protected function serializeTrain(Train $train): array
+    {
+        $cachedPrediction = $train->predictionCache;
+
+        return [
+            'id' => $train->id,
+            'url' => $train->url,
+            'hashname' => $cachedPrediction?->hashname,
+            'originalName' => $train->original_name,
+            'cropName' => $cachedPrediction?->crop_name,
+            'sickNameKor' => $cachedPrediction?->sick_name,
+            'confidence' => $cachedPrediction?->confidence,
+            'userOpinion' => $train->user_opinion,
+            'created_at' => $train->created_at,
+            'updated_at' => $train->updated_at,
+        ];
     }
 }

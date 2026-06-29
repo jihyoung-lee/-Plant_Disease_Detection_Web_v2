@@ -150,8 +150,7 @@ class PredictController extends Controller
             'image' => 'required|mimes:jpeg,bmp,png,jpg'
         ]);
 
-        $hashname = md5_file($validatedData['image']->getRealPath());
-
+        $hashname = hash_file("sha256",$validatedData['image']->getRealPath());
         $existingTrain = Train::where('hashname', $hashname)->latest()->first();
 
 

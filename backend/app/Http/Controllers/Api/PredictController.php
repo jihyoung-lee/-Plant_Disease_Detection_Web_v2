@@ -118,7 +118,7 @@ class PredictController extends Controller
 
     protected function storePhoto($path, $hashname, Request $request, $cropName, $sickNameKor, $confidence)
     {
-            return Train::create([
+            return $request->user()->trains()->create([
                 #'url' => Storage::disk('s3')->url($path),
                 'url' => Storage::disk('public')->url($path), // public/storage/images/xxx.jpg
                 'hashname' => $hashname,

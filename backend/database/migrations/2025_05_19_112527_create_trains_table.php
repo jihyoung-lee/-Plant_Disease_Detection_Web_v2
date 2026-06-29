@@ -13,9 +13,6 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->constrained()
                 ->cascadeOnDelete();
-            $table->foreignId('prediction_cache_id')
-                ->constrained()
-                ->cascadeOnDelete();
             $table->string('url');
             $table->string('original_name');
             $table->text('user_opinion')->nullable();

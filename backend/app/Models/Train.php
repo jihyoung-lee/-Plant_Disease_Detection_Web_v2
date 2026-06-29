@@ -23,5 +23,10 @@ class Train extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function predictionCache()
+    {
+        return $this->belongsTo(PredictionCache::class);
+    }
 }
 

@@ -11,10 +11,12 @@ use function Symfony\Component\Translation\t;
 
 class PredictController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $photos = Train::latest()->paginate(5);
-        return response()->json($photos);
+        return $request->user()
+            ->trains()
+            ->latest()
+            ->paginate(5);
     }
 
     public function store(Request $request)

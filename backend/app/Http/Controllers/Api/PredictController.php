@@ -56,9 +56,9 @@ class PredictController extends Controller
                 );
 
                 $cachedPrediction = PredictionCache::firstOrCreate(
-                    ['hashname' => $hashname],
+                    [   'hashname' => $hashname ,
+                        'crop_name' => $cropName,],
                     [
-                        'crop_name' => $cropName,
                         'sick_name' => $sickName,
                         'confidence' => $confidence,
                     ]

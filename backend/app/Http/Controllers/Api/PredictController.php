@@ -41,9 +41,9 @@ class PredictController extends Controller
         $photoFile = $validated['image'];
         $cropName = $validated['cropName'];
         $hashname = hash_file('sha256', $photoFile->getRealPath());
-        $cachedPrediction = PredictionCache::where(
-            ['crop_name', $cropName],
-            ['hashname', $hashname])->first();
+        $cachedPrediction = PredictionCache::where('crop_name', $cropName)
+            ->where('hashname', $hashname)
+            ->first();
         $cacheHit = $cachedPrediction !== null;
         $path = null;
 

@@ -1,160 +1,212 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\PredictionCache;
 use App\Models\Train;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use function Symfony\Component\Translation\t;
+use Throwable;
 
 class PredictController extends Controller
 {
     public function index(Request $request)
     {
-        return $request->user()
+        $photos = $request->user()
             ->trains()
+            ->with('predictionCache')
             ->latest()
             ->paginate(5);
+
+        $photos->getCollection()->transform(
+            fn (Train $train) => $this->serializeTrain($train)
+        );
+
+        return response()->json($photos);
     }
 
     public function store(Request $request)
     {
-        if (!$request->hasFile('image')) {
-            return response()->json(['error' => '사진을 첨부해주세요'], 422);
-        }
+        $validated = $request->validate([
+            'image' => 'required|file|mimes:jpeg,bmp,png,jpg|max:10240',
+            'cropName' => 'required|string|max:50',
+        ]);
 
-        $modelUrl = config('services.predict.endpoint');;
+        /** @var UploadedFile $photoFile */
+        $photoFile = $validated['image'];
+        $hashname = hash_file('sha256', $photoFile->getRealPath());
+        $cachedPrediction = PredictionCache::where('hashname', $hashname)->first();
+        $cacheHit = $cachedPrediction !== null;
+        $path = null;
 
-      /*  if (Http::post($modelUrl)->serverError()) {
-            return response()->json(['error' => '서버와의 연결이 끊어졌습니다.'], 503);
-        }*/
-        [$hashname, $existingTrain, $validatedData] = $this->validateDuplicatePhoto($request);
+        try {
+            if (!$cachedPrediction) {
+                [$cropName, $sickName, $confidence] = $this->requestPrediction(
+                    config('services.predict.endpoint'),
+                    $photoFile,
+                    $validated['cropName']
+                );
 
-
-        if ($existingTrain) {
-            // 중복이면 insert 하지 않고 기존 데이터만 반환
-            return response()->json([
-                'message' => '중복된 이미지입니다. 기존 데이터를 반환합니다.',
-                'data' => $existingTrain
-            ], 200);
-        } else {
-            try {
-                [$cropName, $sickNameKor, $confidence, $path] = $this->fileUpload($modelUrl, $validatedData['image'], $request);
-                $photo = $this->storePhoto($path, $hashname, $request, $cropName, $sickNameKor, $confidence);
-            } catch (\Exception $e) {
-                return response()->json(['error' => 'AI 분석 오류: ' . $e->getMessage()], 500);
+                $cachedPrediction = PredictionCache::firstOrCreate(
+                    ['hashname' => $hashname],
+                    [
+                        'crop_name' => $cropName,
+                        'sick_name' => $sickName,
+                        'confidence' => $confidence,
+                    ]
+                );
             }
+
+            $path = $this->storeImage($photoFile);
+
+            $photo = DB::transaction(function () use (
+                $request,
+                $photoFile,
+                $path,
+                $cachedPrediction
+            ) {
+                return $this->storePhoto(
+                    $path,
+                    $photoFile,
+                    $request,
+                    $cachedPrediction
+                );
+            });
+
+            return response()->json([
+                'message' => $cacheHit
+                    ? '캐시된 분석 결과를 사용했습니다.'
+                    : '업로드 및 분석이 완료되었습니다.',
+                'cache_hit' => $cacheHit,
+                'data' => $this->serializeTrain($photo),
+            ], 201);
+        } catch (Throwable $e) {
+            if ($path) {
+                Storage::disk('public')->delete($path);
+            }
+
+            Log::error('AI 분석 처리 실패', [
+                'user_id' => $request->user()?->id,
+                'hashname' => $hashname,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'AI 분석 중 오류가 발생했습니다.',
+            ], 500);
         }
-
-        return response()->json([
-            'message' => '업로드 완료',
-            'data' => $photo
-        ], 201);
     }
-
 
     public function opinionStore(Request $request, $id)
     {
-        $request->validate([
-            'cropName' => 'required|string',
-            'sickNameKor' => 'required|string',
+        $validated = $request->validate([
+            'cropName' => 'required|string|max:50',
+            'sickNameKor' => 'required|string|max:255',
         ]);
-
-
-        $userOpinion = $request->cropName . '_' . $request->sickNameKor;
 
         try {
             $train = $request->user()->trains()->findOrFail($id);
-            $train->userOpinion = $userOpinion;
+            $train->user_opinion = $validated['cropName'] . '_' . $validated['sickNameKor'];
             $train->save();
 
             return response()->json(['message' => '의견이 반영되었습니다'], 201);
-        } catch (\Exception $e) {
-            Log::error('의견 전송 실패: ' . $e->getMessage(), [
-                'error' => $e->getMessage()
+        } catch (Throwable $e) {
+            Log::error('의견 전송 실패', [
+                'user_id' => $request->user()?->id,
+                'train_id' => $id,
+                'error' => $e->getMessage(),
             ]);
+
             return response()->json([
                 'success' => false,
-                'message' => '의견 전송에 실패했습니다. 잠시 후 다시 시도해주세요.'
+                'message' => '의견 전송에 실패했습니다. 잠시 후 다시 시도해주세요.',
             ], 500);
         }
-
     }
 
-    protected function fileUpload(string $modelUrl, $photoFile, Request $request): array
-    {
-        $inputCropName = $request->input('cropName');
-
-        try {
-            // FastAPI로 이미지와 cropName 함께 전송
-            $response = Http::attach(
+    protected function requestPrediction(
+        string $modelUrl,
+        UploadedFile $photoFile,
+        string $inputCropName
+    ): array {
+        $response = Http::timeout(30)
+            ->attach(
                 'image',
-                file_get_contents($photoFile),
+                file_get_contents($photoFile->getRealPath()),
                 $photoFile->getClientOriginalName()
-            )->post($modelUrl, [
-                'cropName' => $inputCropName
+            )
+            ->post($modelUrl, [
+                'cropName' => $inputCropName,
             ]);
 
-            if ($response->failed()) {
-                throw new \Exception("AI 분석 서버로부터 실패 응답을 받았습니다.");
-            }
-
-            // FastAPI 응답 파싱
-            $predictedCropName = $response->json('cropName') ?? '알수없음';
-            $sickNameKor = $response->json('sickNameKor') ?? '알수없음';
-            $confidence = $response->json('confidence') ?? 0;
-
-            // 고유한 해시 파일명 생성 및 저장
-            $hashname = $photoFile->hashName();
-            $path = $photoFile->storeAs('images', $hashname, 'public');
-
-            return [$predictedCropName, $sickNameKor, $confidence, $path];
-
-        } catch (\Exception $e) {
-            throw new \Exception("fileUpload 실패: " . $e->getMessage(), 500);
+        if ($response->failed()) {
+            throw new \RuntimeException('AI 분석 서버가 실패 응답을 반환했습니다.');
         }
+
+        $cropName = $response->json('cropName');
+        $sickName = $response->json('sickNameKor');
+        $confidence = $response->json('confidence');
+
+        if (!is_string($cropName) || !is_string($sickName) || !is_numeric($confidence)) {
+            throw new \UnexpectedValueException('AI 분석 응답 형식이 올바르지 않습니다.');
+        }
+
+        return [$cropName, $sickName, (float) $confidence];
     }
 
-
-    protected function storePhoto($path, $hashname, Request $request, $cropName, $sickNameKor, $confidence)
+    protected function storeImage(UploadedFile $photoFile): string
     {
-            return $request->user()->trains()->create([
-                #'url' => Storage::disk('s3')->url($path),
-                'url' => Storage::disk('public')->url($path), // public/storage/images/xxx.jpg
-                'hashname' => $hashname,
-                'originalname' => $request->file('image')->getClientOriginalName(),
-                'cropName' => $cropName,
-                'sickNameKor' => $sickNameKor,
-                'confidence' => $confidence,
-            ]);
+        $path = $photoFile->storeAs(
+            'images',
+            $photoFile->hashName(),
+            'public'
+        );
 
+        if (!is_string($path)) {
+            throw new \RuntimeException('업로드 이미지 저장에 실패했습니다.');
+        }
+
+        return $path;
     }
 
-    protected function createDataFromExisting($existingTrain, $hashname)
-    {
-        return Train::create([
-            'url' => $existingTrain->url,
-            'hashname' => $hashname,
-            'originalname' => $existingTrain->originalname,
-            'cropName' => $existingTrain->cropName,
-            'sickNameKor' => $existingTrain->sickNameKor,
-            'confidence' => $existingTrain->confidence,
+    protected function storePhoto(
+        string $path,
+        UploadedFile $photoFile,
+        Request $request,
+        PredictionCache $cachedPrediction
+    ): Train {
+        $photo = new Train([
+            'url' => Storage::disk('public')->url($path),
+            'original_name' => $photoFile->getClientOriginalName(),
         ]);
+
+        $photo->user()->associate($request->user());
+        $photo->predictionCache()->associate($cachedPrediction);
+        $photo->saveOrFail();
+
+        return $photo;
     }
 
-    protected function validateDuplicatePhoto(Request $request): array
+    protected function serializeTrain(Train $train): array
     {
-        $validatedData = $request->validate([
-            'image' => 'required|mimes:jpeg,bmp,png,jpg'
-        ]);
+        $cachedPrediction = $train->predictionCache;
 
-        $hashname = hash_file("sha256",$validatedData['image']->getRealPath());
-        $existingTrain = Train::where('hashname', $hashname)->latest()->first();
-
-
-
-        return [$hashname, $existingTrain, $validatedData];
+        return [
+            'id' => $train->id,
+            'url' => $train->url,
+            'hashname' => $cachedPrediction?->hashname,
+            'originalName' => $train->original_name,
+            'cropName' => $cachedPrediction?->crop_name,
+            'sickNameKor' => $cachedPrediction?->sick_name,
+            'confidence' => $cachedPrediction?->confidence,
+            'userOpinion' => $train->user_opinion,
+            'created_at' => $train->created_at,
+            'updated_at' => $train->updated_at,
+        ];
     }
 }

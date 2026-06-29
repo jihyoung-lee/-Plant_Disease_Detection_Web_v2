@@ -66,7 +66,7 @@ class PredictController extends Controller
         $userOpinion = $request->cropName . '_' . $request->sickNameKor;
 
         try {
-            $train = Train::findOrFail($id);
+            $train = $request->user()->trains()->findOrFail($id);
             $train->userOpinion = $userOpinion;
             $train->save();
 

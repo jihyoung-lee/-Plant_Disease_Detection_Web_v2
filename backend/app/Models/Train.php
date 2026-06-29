@@ -11,12 +11,8 @@ class Train extends Model
 
     protected $fillable = [
         'url',
-        'hashname',
-        'originalname',
-        'cropName',
-        'sickNameKor',
-        'confidence',
-        'userOpinion',
+        'original_name',
+        'user_opinion',
     ];
 
     public function user()

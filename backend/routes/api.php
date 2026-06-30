@@ -45,7 +45,6 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/results/{id}', [ResultController::class, 'destroy']);
 
     Route::prefix('predict')->group(function () {
-        Route::get('/', [PredictController::class, 'index']);
         Route::post('/', [PredictController::class, 'store']);
         Route::post('/{id}/opinion', [PredictController::class, 'opinionStore']);
     });

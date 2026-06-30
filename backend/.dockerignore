@@ -1,0 +1,10 @@
+.env
+.git
+.idea
+node_modules
+public/storage
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+vendor

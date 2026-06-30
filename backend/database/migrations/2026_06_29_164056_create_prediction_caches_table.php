@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('prediction_caches', function (Blueprint $table) {
             $table->id();
-
-            $table->string('hashname', 64)->unique();
+            $table->string('hashname', 64);
             $table->string('crop_name');
+            $table->unique(['hashname', 'crop_name']);
             $table->string('sick_name');
             $table->float('confidence');
 

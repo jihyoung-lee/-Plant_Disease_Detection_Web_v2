@@ -28,10 +28,12 @@ class GoogleLoginController extends Controller
 
         $googleUser = $response->json();
 
+        // aud는 이 토큰이 어느 앱을 위해 발급됐는지
         if (($googleUser['aud'] ?? null) !== config('services.google.client_id')) {
             return response()->json(['error' => 'Invalid Google token audience'], 401);
         }
 
+        // 이메일 인증 검증
         if (($googleUser['email_verified'] ?? null) !== 'true') {
             return response()->json(['error' => 'Google email is not verified'], 401);
         }

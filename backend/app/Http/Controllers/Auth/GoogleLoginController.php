@@ -28,6 +28,14 @@ class GoogleLoginController extends Controller
 
         $googleUser = $response->json();
 
+        if (($googleUser['aud'] ?? null) !== config('services.google.client_id')) {
+            return response()->json(['error' => 'Invalid Google token audience'], 401);
+        }
+
+        if (($googleUser['email_verified'] ?? null) !== 'true') {
+            return response()->json(['error' => 'Google email is not verified'], 401);
+        }
+
         $user = User::firstOrCreate(
             ['email' => $googleUser['email']],
             [

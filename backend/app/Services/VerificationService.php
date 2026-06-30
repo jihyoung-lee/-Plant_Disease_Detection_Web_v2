@@ -5,12 +5,14 @@ use App\Mail\VerificationCodeMail;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use GuzzleHttp\Client;
 
 class VerificationService
 {
     public function generateCode(string $email, string $name): string
     {
+        $email = $this->normalizeEmail($email);
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         $data = [
@@ -26,7 +28,9 @@ class VerificationService
 
     public function getCodeData(string $email): ?array
     {
+        $email = $this->normalizeEmail($email);
         $cached = Cache::get("verify:email:$email");
+
         return $cached ? json_decode($cached, true) : null;
     }
 
@@ -70,26 +74,64 @@ class VerificationService
             throw new \Exception('메일 전송 중 문제가 발생했습니다.');
         }
     }
-    public function verifyCode(string $email, string $code): bool
+    public function verifyCode(string $email, string $code): ?string
     {
-        $stored = Cache::get("verify:email:$email");
+        $email = $this->normalizeEmail($email);
+        $data = $this->getCodeData($email);
 
-        if (!$stored) {
-            return false;
+        if (!is_array($data) || !isset($data['code'])) {
+            return null;
         }
 
-        $data = json_decode($stored, true);
-
-        if ($data['code'] != $code) {
-            return false;
+        if (!hash_equals((string) $data['code'], $code)) {
+            return null;
         }
 
-        // 인증 성공 시 인증된 상태로 별도 캐시 저장
-        Cache::put("verified:email:$email", $data, now()->addMinutes(30));
-        return true;
+        $token = Str::random(64);
+        $tokenHash = hash('sha256', $token);
+        $expiresAt = now()->addMinutes(30);
+
+        Cache::put($this->registrationTokenKey($token), $email, $expiresAt);
+        Cache::put("verified:email:$email", $tokenHash, $expiresAt);
+        Cache::forget("verify:email:$email");
+
+        return $token;
     }
+
+    public function isRegistrationTokenValid(string $email, string $token): bool
+    {
+        $email = $this->normalizeEmail($email);
+        $tokenHash = hash('sha256', $token);
+        $verifiedTokenHash = Cache::get("verified:email:$email");
+        $verifiedEmail = Cache::get($this->registrationTokenKey($token));
+
+        return is_string($verifiedTokenHash)
+            && is_string($verifiedEmail)
+            && hash_equals($verifiedTokenHash, $tokenHash)
+            && hash_equals($verifiedEmail, $email);
+    }
+
+    public function consumeRegistrationToken(string $email, string $token): void
+    {
+        $email = $this->normalizeEmail($email);
+
+        Cache::forget($this->registrationTokenKey($token));
+        Cache::forget("verified:email:$email");
+    }
+
     public function clearCode(string $email): void
     {
+        $email = $this->normalizeEmail($email);
         Cache::forget("verify:email:$email");
+    }
+
+    private function normalizeEmail(string $email): string
+    {
+        return Str::lower(trim($email));
+    }
+
+    private function registrationTokenKey(string $token): string
+    {
+        return 'verify:registration:' . hash('sha256', $token);
     }
 }

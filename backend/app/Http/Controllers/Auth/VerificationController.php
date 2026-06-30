@@ -86,9 +86,12 @@ class VerificationController extends Controller
             'code' => 'required|string|size:6'
         ]);
 
-        $isValid = $this->verification->verifyCode($validated['email'], $validated['code']);
+        $verificationToken = $this->verification->verifyCode(
+            $validated['email'],
+            $validated['code']
+        );
 
-        if (!$isValid) {
+        if ($verificationToken === null) {
             return response()->json([
                 'success' => false,
                 'message' => '인증코드가 올바르지 않거나 만료되었습니다.'], 400);
@@ -96,11 +99,13 @@ class VerificationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '이메일 인증이 완료되었습니다.'
+            'message' => '이메일 인증이 완료되었습니다.',
+            'verification_token' => $verificationToken,
+            'expires_in' => 1800,
         ]);
     }
 
-    public function check_email(Request $request)
+    public function checkEmail(Request $request)
     {
         $validated = $request->validate([
             'email' => 'required|email:rfc,dns|max:255'

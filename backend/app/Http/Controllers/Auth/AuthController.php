@@ -4,30 +4,52 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\VerificationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+
 class AuthController extends Controller
 {
+    public function __construct(
+        private readonly VerificationService $verification
+    ) {
+    }
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email', // 이메일 중복 방지
-            'password' => 'required|min:8|confirmed'
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'verification_token' => ['required', 'string', 'size:64'],
         ]);
+
+        if (!$this->verification->isRegistrationTokenValid(
+            $validated['email'],
+            $validated['verification_token']
+        )) {
+            throw ValidationException::withMessages([
+                'email' => ['이메일 인증이 필요하거나 인증 정보가 만료되었습니다.'],
+            ]);
+        }
 
         try {
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password)
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
             ]);
+
+            $this->verification->consumeRegistrationToken(
+                $validated['email'],
+                $validated['verification_token']
+            );
 
             return response()->json([
                 'message' => '회원가입이 완료되었습니다.',
-                'user' => $user
+                'user' => $user,
             ], 201);
 
         } catch (\Exception $e) {

@@ -80,7 +80,7 @@
 <script setup>
 import { ref, nextTick, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/lib/axios'
+import api, { setAuthToken } from '@/lib/axios'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -95,6 +95,7 @@ const form = ref({
 })
 
 const verificationCode = ref(Array(6).fill(''))
+const verificationToken = ref('')
 const codeInputs = ref([])
 const verifying = ref(false)
 const error = ref('')
@@ -172,10 +173,11 @@ const verify = async () => {
 
   try {
     const code = verificationCode.value.join('')
-    await api.post('/verify', {
+    const { data } = await api.post('/verify', {
       email: form.value.email,
       code: code
     })
+    verificationToken.value = data.verification_token
     alert('인증 완료!')
     step.value = 3
   } catch (err) {
@@ -196,17 +198,20 @@ const completeRegistration = async () => {
       name: form.value.name,
       email: form.value.email,
       password: form.value.password,
-      password_confirmation: form.value.password_confirmation
+      password_confirmation: form.value.password_confirmation,
+      verification_token: verificationToken.value
     }
 
     await api.post('/register', payload)
 
-    await api.post('/login', {
+    const loginResponse = await api.post('/login', {
       email: form.value.email,
       password: form.value.password
     })
-    // 수정필요
-    setAuthToken(response.data.token);
+
+    if (loginResponse.data.token) {
+      setAuthToken(loginResponse.data.token)
+    }
 
     alert('회원가입 완료!')
     router.push('/list')
@@ -247,7 +252,11 @@ const resendVerification = async () => {
   if (resendCooldown.value > 0) return
 
   try {
-    await api.post('/resend-code', { email: form.value.email })
+    await api.post('/resend-code', {
+      email: form.value.email,
+      name: form.value.name
+    })
+    verificationToken.value = ''
     verificationCode.value = Array(6).fill('')
     if (codeInputs.value[0]) codeInputs.value[0].focus()
     startCooldownTimer()

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ResultResource;
 use App\Models\PredictionCache;
 use App\Models\Train;
 use Illuminate\Http\Request;
@@ -71,7 +72,7 @@ class PredictController extends Controller
                     ? '캐시된 분석 결과를 사용했습니다.'
                     : '업로드 및 분석이 완료되었습니다.',
                 'cache_hit' => $cacheHit,
-                'data' => $this->serializeTrain($photo),
+                'data' => new ResultResource($photo),
             ], 201);
         } catch (Throwable $e) {
             if ($path) {
@@ -178,23 +179,5 @@ class PredictController extends Controller
         $photo->saveOrFail();
 
         return $photo;
-    }
-
-    protected function serializeTrain(Train $train): array
-    {
-        $cachedPrediction = $train->predictionCache;
-
-        return [
-            'id' => $train->id,
-            'url' => $train->url,
-            'hashname' => $cachedPrediction?->hashname,
-            'originalName' => $train->original_name,
-            'cropName' => $cachedPrediction?->crop_name,
-            'sickNameKor' => $cachedPrediction?->sick_name,
-            'confidence' => $cachedPrediction?->confidence,
-            'userOpinion' => $train->user_opinion,
-            'created_at' => $train->created_at,
-            'updated_at' => $train->updated_at,
-        ];
     }
 }

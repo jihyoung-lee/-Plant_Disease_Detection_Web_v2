@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ResultResource;
 use App\Models\Train;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -19,11 +20,7 @@ class ResultController extends Controller
             ->latest()
             ->paginate(6);
 
-        $results->getCollection()->transform(
-            fn (Train $train) => $this->serializeTrain($train)
-        );
-
-        return response()->json($results);
+        return ResultResource::collection($results);
     }
 
     public function show(Request $request, $id)
@@ -39,7 +36,7 @@ class ResultController extends Controller
             ], 404);
         }
 
-        return response()->json($this->serializeTrain($result));
+        return new ResultResource($result);
     }
 
     public function destroy(Request $request, $id)
@@ -92,21 +89,4 @@ class ResultController extends Controller
         return ltrim(substr($path, $position + strlen($marker)), '/');
     }
 
-    protected function serializeTrain(Train $train): array
-    {
-        $cachedPrediction = $train->predictionCache;
-
-        return [
-            'id' => $train->id,
-            'url' => $train->url,
-            'hashname' => $cachedPrediction?->hashname,
-            'originalName' => $train->original_name,
-            'cropName' => $cachedPrediction?->crop_name,
-            'sickNameKor' => $cachedPrediction?->sick_name,
-            'confidence' => $cachedPrediction?->confidence,
-            'userOpinion' => $train->user_opinion,
-            'created_at' => $train->created_at,
-            'updated_at' => $train->updated_at,
-        ];
-    }
 }

@@ -15,21 +15,6 @@ use Throwable;
 
 class PredictController extends Controller
 {
-    public function index(Request $request)
-    {
-        $photos = $request->user()
-            ->trains()
-            ->with('predictionCache')
-            ->latest()
-            ->paginate(5);
-
-        $photos->getCollection()->transform(
-            fn (Train $train) => $this->serializeTrain($train)
-        );
-
-        return response()->json($photos);
-    }
-
     public function store(Request $request)
     {
         $validated = $request->validate([

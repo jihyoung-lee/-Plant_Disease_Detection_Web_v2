@@ -53,17 +53,8 @@ Route::middleware('auth:api')->group(function () {
 
 Route::get('/disease-info', [SearchController::class, 'infoApi']);
 Route::get('/diseases', [SearchController::class, 'diseaseListApi']);
-Route::get('/cache-test', function () {
-    Cache::put('greeting', '안녕, 라라독 Redis!', now()->addMinutes(10));
-    return [
-        'driver' => config('cache.default'),
-        'value' => Cache::get('greeting'),
-    ];
-});
 
-Route::get('/ping', function () {
-    return response()->json(['status' => 'ok']);
-});
+
 
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);

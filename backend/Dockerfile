@@ -1,35 +1,47 @@
-# PHP FPM 베이스 이미지
-FROM php:8.2-fpm
+FROM php:8.2-cli-bookworm
 
-# 시스템 패키지 설치 + PHP 확장 설치
-RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev \
-    libzip-dev && \
-    docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip && \
-    pecl install redis && docker-php-ext-enable redis
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Composer 복사
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        git \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libonig-dev \
+        libpng-dev \
+        libxml2-dev \
+        libzip-dev \
+        unzip \
+        zip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" \
+        bcmath \
+        exif \
+        gd \
+        mbstring \
+        pcntl \
+        pdo_mysql \
+        simplexml \
+        zip \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# 작업 디렉토리
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
 WORKDIR /var/www
 
-# 소스 복사
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --prefer-dist --no-scripts
+
 COPY . .
+COPY docker-entrypoint.sh /usr/local/bin/app-entrypoint
+RUN composer dump-autoload --optimize \
+    && chmod +x /usr/local/bin/app-entrypoint
 
-# 퍼미션 설정
-RUN chown -R www-data:www-data /var/www && \
-    chmod -R 755 storage bootstrap/cache
-
-# Composer install
-RUN composer install --no-dev --optimize-autoloader
-
-# start.sh 복사
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
-# 포트 열기
 EXPOSE 8000
 
-# 시작 스크립트
-CMD ["/start.sh"]
+ENTRYPOINT ["app-entrypoint"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

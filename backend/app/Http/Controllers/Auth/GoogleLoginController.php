@@ -28,13 +28,18 @@ class GoogleLoginController extends Controller
 
         $googleUser = $response->json();
 
-        $user = User::updateOrCreate(
+        $user = User::firstOrCreate(
             ['email' => $googleUser['email']],
             [
-                'name' => $googleUser['name'] ?? 'No Name',
+                'name' => $googleUser['name'],
                 'password' => bcrypt(Str::random(24)),
             ]
         );
+
+        $user->update([
+            'name' => $googleUser['name'],
+            'google_id' => $googleUser['sub'],
+        ]);
 
         $token = JWTAuth::fromUser($user);
 

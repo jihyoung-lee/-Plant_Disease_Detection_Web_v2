@@ -10,7 +10,10 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'name', 'email', 'password'
     ];
-
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
     public function trains(){
         return $this->hasMany(Train::class);
     }

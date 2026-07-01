@@ -22,8 +22,8 @@ class FileUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cropName' => 'required|string|max:50',
-            'sickNameKor' => 'required|string|max:255',
+            'image' => ['required', 'image', 'mimes:jpeg,bmp,png,jpg', 'max:10240'],
+            'cropName' => ['required', 'string', 'max:50'],
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FileUploadRequest;
 use App\Http\Resources\ResultResource;
 use App\Models\PredictionCache;
 use App\Models\Train;
@@ -91,12 +92,9 @@ class PredictController extends Controller
         }
     }
 
-    public function opinionStore(Request $request, $id)
+    public function opinionStore(FileUploadRequest $request, $id)
     {
-        $validated = $request->validate([
-            'cropName' => 'required|string|max:50',
-            'sickNameKor' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         try {
             $train = $request->user()->trains()->findOrFail($id);

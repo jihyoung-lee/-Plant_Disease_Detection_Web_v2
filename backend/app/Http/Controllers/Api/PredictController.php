@@ -88,12 +88,9 @@ class PredictController extends Controller
         }
     }
 
-    public function opinionStore(Request $request, $id)
+    public function opinionStore(FileUploadRequest $request, $id)
     {
-        $validated = $request->validate([
-            'cropName' => 'required|string|max:50',
-            'sickNameKor' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         try {
             $train = $request->user()->trains()->findOrFail($id);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FileUploadRequest;
 use App\Http\Resources\ResultResource;
 use App\Models\PredictionCache;
 use App\Models\Train;
@@ -16,13 +17,9 @@ use Throwable;
 
 class PredictController extends Controller
 {
-    public function store(Request $request)
+    public function store(FileUploadRequest $request)
     {
-        $validated = $request->validate([
-            'image' => 'required|file|mimes:jpeg,bmp,png,jpg|max:10240',
-            'cropName' => 'required|string|max:50',
-        ]);
-
+        $validated = $request->validated();
         /** @var UploadedFile $photoFile */
         $photoFile = $validated['image'];
         $cropName = $validated['cropName'];

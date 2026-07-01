@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SendVerificationCodeRequest;
 use App\Models\User;
 use App\Services\VerificationService;
 use Illuminate\Http\Request;
@@ -18,13 +19,9 @@ class VerificationController extends Controller
         $this->verification = $verification;
     }
 
-    public function notification(Request $request)
+    public function notification(SendVerificationCodeRequest $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email|max:255',
-            'name' => 'required|string|max:255',
-        ]);
-
+        $validated = $request->validated();
         try {
             if (User::where('email', $validated['email'])->exists()) {
                 return response()->json([
@@ -52,13 +49,10 @@ class VerificationController extends Controller
         }
     }
 
-    public function resend(Request $request)
+    public function resend(SendVerificationCodeRequest $request)
     {
         try{
-        $validated = $request->validate([
-            'email' => 'required|email|max:255',
-            'name' => 'required|string|max:255',
-        ]);
+            $validated = $request->validated();
 
         $this->verification->generateCodeAndSend($validated['email'], $validated['name']);
 

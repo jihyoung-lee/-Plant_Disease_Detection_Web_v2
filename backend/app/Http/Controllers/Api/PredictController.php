@@ -98,7 +98,7 @@ class PredictController extends Controller
             $train->user_opinion = $validated['cropName'] . '_' . $validated['sickNameKor'];
             $train->save();
 
-            return response()->json(['message' => '의견이 반영되었습니다'], 201);
+            return response()->json(['message' => '의견이 반영되었습니다'], 200);
         } catch (Throwable $e) {
             Log::error('의견 전송 실패', [
                 'user_id' => $request->user()?->id,

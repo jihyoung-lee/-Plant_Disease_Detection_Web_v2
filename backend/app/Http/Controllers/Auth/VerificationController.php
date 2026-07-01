@@ -98,9 +98,7 @@ class VerificationController extends Controller
 
     public function checkEmail(Request $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email:rfc,dns|max:255'
-        ]);
+        $validated = $request->validated();
 
         $cacheKey = 'email_check:' . sha1($validated['email']);
 

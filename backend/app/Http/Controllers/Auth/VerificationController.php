@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CheckEmailRequest;
 use App\Http\Requests\SendVerificationCodeRequest;
 use App\Http\Requests\VerifyEmailCodeRequest;
 use App\Models\User;
@@ -96,7 +97,7 @@ class VerificationController extends Controller
         ]);
     }
 
-    public function checkEmail(Request $request)
+    public function checkEmail(CheckEmailRequest $request)
     {
         $validated = $request->validated();
 

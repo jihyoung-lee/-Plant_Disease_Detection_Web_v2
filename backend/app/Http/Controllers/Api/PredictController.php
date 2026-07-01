@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FileUploadRequest;
+use App\Http\Requests\UserOpinionRequest;
 use App\Http\Resources\ResultResource;
 use App\Models\PredictionCache;
 use App\Models\Train;
@@ -88,7 +89,7 @@ class PredictController extends Controller
         }
     }
 
-    public function opinionStore(FileUploadRequest $request, $id)
+    public function opinionStore(UserOpinionRequest $request, $id)
     {
         $validated = $request->validated();
 

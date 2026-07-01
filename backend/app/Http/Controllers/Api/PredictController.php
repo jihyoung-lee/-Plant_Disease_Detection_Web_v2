@@ -93,24 +93,17 @@ class PredictController extends Controller
     {
         $validated = $request->validated();
 
-        try {
-            $train = $request->user()->trains()->findOrFail($id);
-            $train->user_opinion = $validated['cropName'] . '_' . $validated['sickNameKor'];
-            $train->save();
+        $train = $request->user()
+            ->trains()
+            ->findOrFail($id);
 
-            return response()->json(['message' => '의견이 반영되었습니다'], 200);
-        } catch (Throwable $e) {
-            Log::error('의견 전송 실패', [
-                'user_id' => $request->user()?->id,
-                'train_id' => $id,
-                'error' => $e->getMessage(),
-            ]);
+        $train->update([
+            'user_opinion' => $validated['cropName'] . '_' . $validated['sickNameKor'],
+        ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => '의견 전송에 실패했습니다. 잠시 후 다시 시도해주세요.',
-            ], 500);
-        }
+        return response()->json([
+            'message' => '의견이 반영되었습니다',
+        ], 200);
     }
 
     protected function requestPrediction(

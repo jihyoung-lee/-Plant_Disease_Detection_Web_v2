@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SendVerificationCodeRequest;
+use App\Http\Requests\VerifyEmailCodeRequest;
 use App\Models\User;
 use App\Services\VerificationService;
 use Illuminate\Http\Request;
@@ -73,13 +74,9 @@ class VerificationController extends Controller
         }
     }
 
-    public function verify(Request $request)
+    public function verify(VerifyEmailCodeRequest $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email|max:255',
-            'code' => 'required|string|size:6'
-        ]);
-
+        $validated = $request->validated();
         $verificationToken = $this->verification->verifyCode(
             $validated['email'],
             $validated['code']

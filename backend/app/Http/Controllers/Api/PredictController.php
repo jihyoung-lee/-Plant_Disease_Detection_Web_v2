@@ -8,8 +8,10 @@ use App\Http\Requests\UserOpinionRequest;
 use App\Http\Resources\ResultResource;
 use App\Models\PredictionCache;
 use App\Models\Train;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -24,28 +26,24 @@ class PredictController extends Controller
         /** @var UploadedFile $photoFile */
         $photoFile = $validated['image'];
         $cropName = $validated['cropName'];
-        $hashname = hash_file('sha256', $photoFile->getRealPath());
-        $cachedPrediction = PredictionCache::where('crop_name', $cropName)
-            ->where('hashname', $hashname)
-            ->first();
-        $cacheHit = $cachedPrediction !== null;
+        $hashname = null;
         $path = null;
 
         try {
-            if (!$cachedPrediction) {
-                [$cropName, $sickName, $confidence] = $this->requestPrediction(
-                    config('services.predict.endpoint'),
-                    $photoFile,
-                    $validated['cropName']
-                );
+            $hashname = hash_file('sha256', $photoFile->getRealPath());
 
-                $cachedPrediction = PredictionCache::firstOrCreate(
-                    [   'hashname' => $hashname ,
-                        'crop_name' => $cropName,],
-                    [
-                        'sick_name' => $sickName,
-                        'confidence' => $confidence,
-                    ]
+            if (!is_string($hashname)) {
+                throw new \RuntimeException('업로드 이미지 해시 생성에 실패했습니다.');
+            }
+
+            $cachedPrediction = $this->findCachedPrediction($hashname, $cropName);
+            $cacheHit = $cachedPrediction !== null;
+
+            if (!$cachedPrediction) {
+                [$cachedPrediction, $cacheHit] = $this->resolvePrediction(
+                    $hashname,
+                    $cropName,
+                    $photoFile
                 );
             }
 
@@ -65,16 +63,35 @@ class PredictController extends Controller
                 );
             });
 
+            return (new ResultResource($photo->loadMissing('predictionCache')))
+                ->additional([
+                    'message' => $cacheHit
+                        ? '캐시된 분석 결과를 사용했습니다.'
+                        : '업로드 및 분석이 완료되었습니다.',
+                    'cache_hit' => $cacheHit,
+                ])
+                ->response()
+                ->setStatusCode(201);
+        } catch (LockTimeoutException $e) {
+            Log::warning('동일 이미지 분석 요청 대기 시간 초과', [
+                'user_id' => $request->user()?->id,
+                'hashname' => $hashname,
+                'crop_name' => $cropName,
+            ]);
+
             return response()->json([
-                'message' => $cacheHit
-                    ? '캐시된 분석 결과를 사용했습니다.'
-                    : '업로드 및 분석이 완료되었습니다.',
-                'cache_hit' => $cacheHit,
-                'data' => new ResultResource($photo),
-            ], 201);
+                'error' => '동일한 이미지가 분석 중입니다. 잠시 후 다시 시도해주세요.',
+            ], 503);
         } catch (Throwable $e) {
             if ($path) {
-                Storage::disk('public')->delete($path);
+                try {
+                    Storage::disk('public')->delete($path);
+                } catch (Throwable $deleteException) {
+                    Log::warning('실패한 분석 이미지 정리 중 오류 발생', [
+                        'file' => $path,
+                        'error' => $deleteException->getMessage(),
+                    ]);
+                }
             }
 
             Log::error('AI 분석 처리 실패', [
@@ -87,6 +104,75 @@ class PredictController extends Controller
                 'error' => 'AI 분석 중 오류가 발생했습니다.',
             ], 500);
         }
+    }
+
+    private function findCachedPrediction(
+        string $hashname,
+        string $cropName
+    ): ?PredictionCache {
+        return PredictionCache::where('hashname', $hashname)
+            ->where('crop_name', $cropName)
+            ->first();
+    }
+
+    /**
+     * 같은 이미지가 동시에 들어오면 AI 요청은 한 번만 보냄
+     *
+     * @return array{0: PredictionCache, 1: bool}
+     */
+    private function resolvePrediction(
+        string $hashname,
+        string $cropName,
+        UploadedFile $photoFile
+    ): array {
+        $lockKey = 'prediction:' . hash('sha256', $hashname . '|' . $cropName);
+
+        return Cache::lock($lockKey, 45)->block(40, function () use (
+            $hashname,
+            $cropName,
+            $photoFile
+        ) {
+            // 기다리는 동안 먼저 끝난 요청이 있는지 다시 확인
+            $cachedPrediction = $this->findCachedPrediction($hashname, $cropName);
+
+            if ($cachedPrediction) {
+                return [$cachedPrediction, true];
+            }
+
+            $modelUrl = config('services.predict.endpoint');
+
+            if (!is_string($modelUrl) || $modelUrl === '') {
+                throw new \RuntimeException('AI 분석 서버 주소가 설정되지 않았습니다.');
+            }
+
+            [$responseCropName, $sickName, $confidence] = $this->requestPrediction(
+                $modelUrl,
+                $photoFile,
+                $cropName
+            );
+
+            if ($responseCropName !== $cropName) {
+                Log::warning('AI 응답 작물명이 요청값과 다름', [
+                    'requested' => $cropName,
+                    'responded' => $responseCropName,
+                    'hashname' => $hashname,
+                ]);
+            }
+
+            // 캐시 기준은 사용자가 선택한 작물명으로 통일
+            $prediction = PredictionCache::firstOrCreate(
+                [
+                    'hashname' => $hashname,
+                    'crop_name' => $cropName,
+                ],
+                [
+                    'sick_name' => $sickName,
+                    'confidence' => $confidence,
+                ]
+            );
+
+            return [$prediction, !$prediction->wasRecentlyCreated];
+        });
     }
 
     public function opinionStore(UserOpinionRequest $request, $id)
@@ -111,15 +197,27 @@ class PredictController extends Controller
         UploadedFile $photoFile,
         string $inputCropName
     ): array {
-        $response = Http::timeout(30)
-            ->attach(
-                'image',
-                file_get_contents($photoFile->getRealPath()),
-                $photoFile->getClientOriginalName()
-            )
-            ->post($modelUrl, [
-                'cropName' => $inputCropName,
-            ]);
+        $stream = fopen($photoFile->getRealPath(), 'rb');
+
+        if ($stream === false) {
+            throw new \RuntimeException('업로드 이미지를 읽을 수 없습니다.');
+        }
+
+        try {
+            $response = Http::connectTimeout(5)
+                ->timeout(30)
+                ->acceptJson()
+                ->attach(
+                    'image',
+                    $stream,
+                    $photoFile->getClientOriginalName()
+                )
+                ->post($modelUrl, [
+                    'cropName' => $inputCropName,
+                ]);
+        } finally {
+            fclose($stream);
+        }
 
         if ($response->failed()) {
             throw new \RuntimeException('AI 분석 서버가 실패 응답을 반환했습니다.');
@@ -129,11 +227,21 @@ class PredictController extends Controller
         $sickName = $response->json('sickNameKor');
         $confidence = $response->json('confidence');
 
-        if (!is_string($cropName) || !is_string($sickName) || !is_numeric($confidence)) {
+        if (
+            !is_string($cropName)
+            || !is_string($sickName)
+            || !is_numeric($confidence)
+            || trim($cropName) === ''
+            || trim($sickName) === ''
+            || mb_strlen($cropName) > 50
+            || mb_strlen($sickName) > 255
+            || (float) $confidence < 0
+            || (float) $confidence > 100
+        ) {
             throw new \UnexpectedValueException('AI 분석 응답 형식이 올바르지 않습니다.');
         }
 
-        return [$cropName, $sickName, (float) $confidence];
+        return [trim($cropName), trim($sickName), (float) $confidence];
     }
 
     protected function storeImage(UploadedFile $photoFile): string

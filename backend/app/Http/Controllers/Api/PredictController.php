@@ -8,6 +8,7 @@ use App\Http\Requests\UserOpinionRequest;
 use App\Http\Resources\ResultResource;
 use App\Models\PredictionCache;
 use App\Models\Train;
+use App\Enums\CropName;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -151,7 +152,9 @@ class PredictController extends Controller
                 $cropName
             );
 
-            if ($responseCropName !== $cropName) {
+            $expectedCropName = CropName::from($cropName)->korean();
+
+            if ($responseCropName !== $expectedCropName) {
                 Log::warning('AI 응답 작물명이 요청값과 다름', [
                     'requested' => $cropName,
                     'responded' => $responseCropName,

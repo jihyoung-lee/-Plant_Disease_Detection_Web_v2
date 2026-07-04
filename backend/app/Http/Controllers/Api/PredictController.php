@@ -9,18 +9,23 @@ use App\Http\Resources\ResultResource;
 use App\Models\PredictionCache;
 use App\Models\Train;
 use App\Enums\CropName;
+use App\Services\PredictionApiClient;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class PredictController extends Controller
 {
+    public function __construct(
+        private readonly PredictionApiClient $predictionApiClient
+    ) {
+    }
+
     public function store(FileUploadRequest $request)
     {
         $validated = $request->validated();
@@ -140,14 +145,7 @@ class PredictController extends Controller
                 return [$cachedPrediction, true];
             }
 
-            $modelUrl = config('services.predict.endpoint');
-
-            if (!is_string($modelUrl) || $modelUrl === '') {
-                throw new \RuntimeException('AI 분석 서버 주소가 설정되지 않았습니다.');
-            }
-
-            [$responseCropName, $sickName, $confidence] = $this->requestPrediction(
-                $modelUrl,
+            [$responseCropName, $sickName, $confidence] = $this->predictionApiClient->predict(
                 $photoFile,
                 $cropName
             );
@@ -193,77 +191,6 @@ class PredictController extends Controller
         return response()->json([
             'message' => '의견이 반영되었습니다',
         ], 200);
-    }
-
-    protected function requestPrediction(
-        string $modelUrl,
-        UploadedFile $photoFile,
-        string $inputCropName
-    ): array {
-        $stream = fopen($photoFile->getRealPath(), 'rb');
-
-        if ($stream === false) {
-            throw new \RuntimeException('업로드 이미지를 읽을 수 없습니다.');
-        }
-
-        try {
-            $response = Http::connectTimeout(5)
-                ->timeout(30)
-                ->acceptJson()
-                ->attach(
-                    'image',
-                    $stream,
-                    $photoFile->getClientOriginalName(),
-                    ['Content-Type' => $photoFile->getMimeType()]
-                )
-                ->post($modelUrl, [
-                    'crop_name' => $inputCropName,
-                ]);
-        } finally {
-            fclose($stream);
-        }
-
-        if ($response->failed()) {
-            throw new \RuntimeException('AI 분석 서버가 실패 응답을 반환했습니다.');
-        }
-
-        $result = $response->json();
-
-        if (!($result['success'] ?? false )) {
-            throw new \RuntimeException(
-                $result['error']['message'] ?? $result['message'] ?? 'AI 예측 실패'
-            );
-        }
-
-        $data = $result['data'] ?? null;
-
-        if (!isset($data)) {
-            throw new \RuntimeException('AI prediction response data is missing.');
-        }
-        if (!is_array($data)) {
-            throw new \UnexpectedValueException(
-                'AI prediction response data is missing.'
-            );
-        }
-        $cropName = $data['crop_name'] ?? '';
-        $sickName = $data['sick_name_kor'] ?? '';
-        $confidence = $data['confidence'] ?? null;
-
-        if (
-            !is_string($cropName)
-            || !is_string($sickName)
-            || !is_numeric($confidence)
-            || trim($cropName) === ''
-            || trim($sickName) === ''
-            || mb_strlen($cropName) > 50
-            || mb_strlen($sickName) > 255
-            || (float) $confidence < 0
-            || (float) $confidence > 100
-        ) {
-            throw new \UnexpectedValueException('AI 분석 응답 형식이 올바르지 않습니다.');
-        }
-
-        return [trim($cropName), trim($sickName), (float) $confidence];
     }
 
     protected function storeImage(UploadedFile $photoFile): string

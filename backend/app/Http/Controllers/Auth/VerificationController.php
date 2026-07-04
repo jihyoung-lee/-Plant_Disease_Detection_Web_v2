@@ -14,11 +14,10 @@ use Illuminate\Support\Facades\Log;
 
 class VerificationController extends Controller
 {
-    protected $verification;
-
-    public function __construct(VerificationService $verification)
+    public function __construct(
+        private readonly VerificationService $verificationService
+        )
     {
-        $this->verification = $verification;
     }
 
     public function notification(SendVerificationCodeRequest $request)
@@ -31,7 +30,7 @@ class VerificationController extends Controller
                     'message' => '이미 사용 중인 이메일입니다.'], 422);
             }
 
-            $this->verification->generateCodeAndSend($validated['email'], $validated['name']);
+            $this->verificationService->generateCodeAndSend($validated['email'], $validated['name']);
 
             return response()->json([
                 'success' => true,
@@ -56,7 +55,7 @@ class VerificationController extends Controller
         try{
             $validated = $request->validated();
 
-        $this->verification->generateCodeAndSend($validated['email'], $validated['name']);
+        $this->verificationService->generateCodeAndSend($validated['email'], $validated['name']);
 
         return response()->json([
             'success' => true,
@@ -78,7 +77,7 @@ class VerificationController extends Controller
     public function verify(VerifyEmailCodeRequest $request)
     {
         $validated = $request->validated();
-        $verificationToken = $this->verification->verifyCode(
+        $verificationToken = $this->verificationService->verifyCode(
             $validated['email'],
             $validated['code']
         );

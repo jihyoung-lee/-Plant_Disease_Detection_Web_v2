@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CropName;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class FileUploadRequest extends FormRequest
 {
@@ -23,7 +25,7 @@ class FileUploadRequest extends FormRequest
     {
         return [
             'image' => ['required', 'image', 'mimes:jpeg,bmp,png,jpg', 'max:10240'],
-            'cropName' => ['required', 'string', 'max:50'],
+            'cropName' => ['required', 'string', 'max:50', Rule::in(CropName::values())],
         ];
     }
 }

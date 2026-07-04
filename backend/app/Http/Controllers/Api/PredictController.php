@@ -232,13 +232,19 @@ class PredictController extends Controller
             );
         }
 
-        if (!isset($result['data'])) {
+        $data = $result['data'] ?? null;
+
+        if (!isset($data)) {
             throw new \RuntimeException('AI prediction response data is missing.');
         }
-
-        $cropName = $result['data']['crop_name'] ?? '';
-        $sickName = $result['data']['sick_name_kor'] ?? '';
-        $confidence = $result['data']['confidence'] ?? '';
+        if (!is_array($data)) {
+            throw new \UnexpectedValueException(
+                'AI prediction response data is missing.'
+            );
+        }
+        $cropName = $data['crop_name'] ?? '';
+        $sickName = $data['sick_name_kor'] ?? '';
+        $confidence = $data['confidence'] ?? null;
 
         if (
             !is_string($cropName)

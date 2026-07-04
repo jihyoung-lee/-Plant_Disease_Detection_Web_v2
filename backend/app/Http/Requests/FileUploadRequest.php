@@ -27,4 +27,15 @@ class FileUploadRequest extends BaseFormRequest
             'cropName' => ['required', 'string', 'max:50', Rule::in(CropName::values())],
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $cropName = $this->input('cropName');
+
+        if (is_string($cropName)) {
+            $this->merge([
+                'cropName' => strtolower(trim($cropName)),
+            ]);
+        }
+    }
 }

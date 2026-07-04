@@ -210,7 +210,8 @@ class PredictController extends Controller
                 ->attach(
                     'image',
                     $stream,
-                    $photoFile->getClientOriginalName()
+                    $photoFile->getClientOriginalName(),
+                    ['Content-Type' => $photoFile->getMimeType()]
                 )
                 ->post($modelUrl, [
                     'crop_name' => $inputCropName,
@@ -225,7 +226,7 @@ class PredictController extends Controller
 
         $result = $response->json();
 
-        if (!$result['success'] ?? false ) {
+        if (!($result['success'] ?? false )) {
             throw new \RuntimeException(
                 $result['error']['message'] ?? $result['message'] ?? 'AI 예측 실패'
             );

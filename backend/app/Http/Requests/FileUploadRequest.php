@@ -3,10 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Enums\CropName;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class FileUploadRequest extends FormRequest
+class FileUploadRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

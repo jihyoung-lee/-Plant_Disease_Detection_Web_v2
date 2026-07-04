@@ -213,7 +213,7 @@ class PredictController extends Controller
                     $photoFile->getClientOriginalName()
                 )
                 ->post($modelUrl, [
-                    'cropName' => $inputCropName,
+                    'crop_name' => $inputCropName,
                 ]);
         } finally {
             fclose($stream);
@@ -223,9 +223,21 @@ class PredictController extends Controller
             throw new \RuntimeException('AI 분석 서버가 실패 응답을 반환했습니다.');
         }
 
-        $cropName = $response->json('cropName');
-        $sickName = $response->json('sickNameKor');
-        $confidence = $response->json('confidence');
+        $result = $response->json();
+
+        if (!$result['success'] ?? false ) {
+            throw new \RuntimeException(
+                $result['error']['message'] ?? $result['message'] ?? 'AI 예측 실패'
+            );
+        }
+
+        if (!isset($result['data'])) {
+            throw new \RuntimeException('AI prediction response data is missing.');
+        }
+
+        $cropName = $result['data']['crop_name'] ?? '';
+        $sickName = $result['data']['sick_name_kor'] ?? '';
+        $confidence = $result['data']['confidence'] ?? '';
 
         if (
             !is_string($cropName)

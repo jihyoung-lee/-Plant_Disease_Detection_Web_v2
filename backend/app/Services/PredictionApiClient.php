@@ -4,15 +4,16 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+use App\DTOs\PredictionApiResponse;
 use RuntimeException;
 use UnexpectedValueException;
 
 class PredictionApiClient
 {
     /**
-     * @return array{0: string, 1: string, 2: float}
+     * @return PredictionApiResponse
      */
-    public function predict(UploadedFile $photoFile, string $inputCropName): array
+    public function predict(UploadedFile $photoFile, string $inputCropName): PredictionApiResponse
     {
         $modelUrl = config('services.predict.endpoint');
 
@@ -89,6 +90,10 @@ class PredictionApiClient
             throw new UnexpectedValueException('AI 분석 응답 형식이 올바르지 않습니다.');
         }
 
-        return [trim($cropName), trim($sickName), (float) $confidence];
+        return new PredictionApiResponse(
+            cropName: trim($cropName),
+            sickNameKor: trim($sickName),
+            confidence: (float) $confidence,
+        );
     }
 }

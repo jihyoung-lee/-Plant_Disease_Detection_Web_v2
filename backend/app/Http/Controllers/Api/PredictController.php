@@ -145,17 +145,17 @@ class PredictController extends Controller
                 return [$cachedPrediction, true];
             }
 
-            [$responseCropName, $sickName, $confidence] = $this->predictionApiClient->predict(
+            $result = $this->predictionApiClient->predict(
                 $photoFile,
                 $cropName
             );
 
             $expectedCropName = CropName::from($cropName)->korean();
 
-            if ($responseCropName !== $expectedCropName) {
+            if ($result->cropName !== $expectedCropName) {
                 Log::warning('AI 응답 작물명이 요청값과 다름', [
                     'requested' => $cropName,
-                    'responded' => $responseCropName,
+                    'responded' => $result->cropName,
                     'hashname' => $hashname,
                 ]);
             }
@@ -167,8 +167,8 @@ class PredictController extends Controller
                     'crop_name' => $cropName,
                 ],
                 [
-                    'sick_name' => $sickName,
-                    'confidence' => $confidence,
+                    'sick_name' => $result->sickNameKor,
+                    'confidence' => $result->confidence,
                 ]
             );
 

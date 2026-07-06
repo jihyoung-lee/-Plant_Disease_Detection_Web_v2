@@ -5,8 +5,12 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use App\DTOs\PredictionApiResponse;
+use App\Exceptions\Prediction\PredictionNetworkException;
+use App\Exceptions\Prediction\PredictionResponseFormatException;
+use App\Exceptions\Prediction\PredictionUpstreamException;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
 use RuntimeException;
-use UnexpectedValueException;
 
 class PredictionApiClient
 {
@@ -46,30 +50,35 @@ class PredictionApiClient
                 ->post($modelUrl, [
                     'crop_name' => $inputCropName,
                 ]);
+        } catch (ConnectionException $e) {
+            throw new PredictionNetworkException(
+                'AI 분석 서버에 연결할 수 없습니다.',
+                previous: $e
+            );
         } finally {
             fclose($stream);
         }
 
-        if ($response->failed()) {
-            throw new RuntimeException('AI 분석 서버가 실패 응답을 반환했습니다.');
-        }
-
         $result = $response->json();
 
+        if ($response->failed()) {
+            throw $this->upstreamException($response, $result);
+        }
+
         if (!is_array($result)) {
-            throw new UnexpectedValueException('AI 분석 서버가 잘못된 JSON 응답을 반환했습니다.');
+            throw new PredictionResponseFormatException(
+                'AI 분석 서버가 잘못된 JSON 응답을 반환했습니다.'
+            );
         }
 
         if (!($result['success'] ?? false)) {
-            throw new RuntimeException(
-                $result['error']['message'] ?? $result['message'] ?? 'AI 예측 실패'
-            );
+            throw $this->upstreamException($response, $result);
         }
 
         $data = $result['data'] ?? null;
 
         if (!is_array($data)) {
-            throw new UnexpectedValueException('AI prediction response data is missing.');
+            throw new PredictionResponseFormatException('AI prediction response data is missing.');
         }
 
         $cropName = $data['crop_name'] ?? '';
@@ -87,13 +96,31 @@ class PredictionApiClient
             || (float) $confidence < 0
             || (float) $confidence > 100
         ) {
-            throw new UnexpectedValueException('AI 분석 응답 형식이 올바르지 않습니다.');
+            throw new PredictionResponseFormatException('AI 분석 응답 형식이 올바르지 않습니다.');
         }
 
         return new PredictionApiResponse(
             cropName: trim($cropName),
             sickNameKor: trim($sickName),
             confidence: (float) $confidence,
+        );
+    }
+
+    private function upstreamException(Response $response, mixed $result): PredictionUpstreamException
+    {
+        $error = is_array($result) && is_array($result['error'] ?? null)
+            ? $result['error']
+            : [];
+
+        $errorCode = $error['code'] ?? null;
+        $message = $error['message']
+            ?? (is_array($result) ? ($result['message'] ?? null) : null)
+            ?? 'AI 분석 서버가 실패 응답을 반환했습니다.';
+
+        return new PredictionUpstreamException(
+            status: $response->status(),
+            errorCode: is_string($errorCode) ? $errorCode : null,
+            message: is_string($message) ? $message : 'AI 분석 서버 오류'
         );
     }
 }

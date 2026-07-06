@@ -33,8 +33,8 @@ class PredictionApiClient
         }
 
         try {
-            $response = Http::connectTimeout(5)
-                ->timeout(30)
+            $response = Http::connectTimeout(config('services.predict.connect_timeout'))
+                ->timeout(config('services.predict.timeout'))
                 ->acceptJson()
                 ->attach(
                     'image',

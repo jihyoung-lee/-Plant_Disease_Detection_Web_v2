@@ -39,6 +39,8 @@ return [
     ],
     'predict' => [
         'endpoint' => env('PREDICT_URL', 'http://127.0.0.1:5000/predict'),
+        'connect_timeout' => env('PREDICTION_API_CONNECT_TIMEOUT', 5),
+        'timeout' => env('PREDICTION_API_TIMEOUT', 30),
     ],
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),

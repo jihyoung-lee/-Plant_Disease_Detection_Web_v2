@@ -21,7 +21,7 @@ class VerificationService
             'code' => $code,
         ];
 
-        Cache::put("verify:email:$email", json_encode($data), now()->addMinutes(30));
+        Cache::put("verify:email:$email", json_encode($data), now()->addMinutes(5));
 
         return $code;
     }

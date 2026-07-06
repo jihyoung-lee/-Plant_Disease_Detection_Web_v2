@@ -7,6 +7,7 @@ use App\Exceptions\Prediction\PredictionNetworkException;
 use App\Exceptions\Prediction\PredictionResponseFormatException;
 use App\Exceptions\Prediction\PredictionUpstreamException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -30,7 +31,9 @@ class PredictionApiClient
 
         $imageStream = fopen($imagePath, 'rb');
 
-        if ($imageStream === false) {
+        $imageContents = file_get_contents($image->getRealPath());
+
+        if ($imageContents === false) {
             throw new RuntimeException('업로드 이미지를 읽을 수 없습니다.');
         }
 
@@ -38,9 +41,27 @@ class PredictionApiClient
             $response = Http::connectTimeout(config('services.predict.connect_timeout'))
                 ->timeout(config('services.predict.timeout'))
                 ->acceptJson()
+                ->retry(
+                    3,
+                    500,
+                    function ($exception) {
+                        if ($exception instanceof ConnectionException) {
+                            return true;
+                        }
+
+                        if ($exception instanceof RequestException) {
+                            return in_array(
+                                $exception->response?->status(),
+                                [500, 502, 503, 504],
+                                false
+                            );
+                        }
+
+                        return false;
+                    })
                 ->attach(
                     'image',
-                    $imageStream,
+                    $imageContents,
                     $image->getClientOriginalName(),
                     ['Content-Type' => $image->getMimeType()]
                 )

@@ -7,7 +7,7 @@ use App\Http\Requests\CheckEmailRequest;
 use App\Http\Requests\SendVerificationCodeRequest;
 use App\Http\Requests\VerifyEmailCodeRequest;
 use App\Models\User;
-use App\Services\VerificationService;
+use App\Services\Mail\VerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;

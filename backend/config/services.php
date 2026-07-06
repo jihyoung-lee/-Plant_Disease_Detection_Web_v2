@@ -16,6 +16,13 @@ return [
 
     'mailersend' => [
         'key' => env('MAILERSEND_API_KEY'),
+        'endpoint' => env('MAILERSEND_ENDPOINT', 'https://api.mailersend.com/v1/email'),
+        'from' => [
+            'address' => env('MAILERSEND_FROM_ADDRESS', env('MAIL_FROM_ADDRESS')),
+            'name' => env('MAILERSEND_FROM_NAME', env('MAIL_FROM_NAME', 'AI 서비스')),
+        ],
+        'connect_timeout' => env('MAILERSEND_CONNECT_TIMEOUT', 5),
+        'timeout' => env('MAILERSEND_TIMEOUT', 10),
     ],
 
     'mailgun' => [

@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\Auth\{AuthController, LoginController, VerificationController};
-use App\Http\Controllers\Api\PredictController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Cache;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\Api\ResultController;
+use App\Http\Controllers\Api\PredictionController;
+use App\Http\Controllers\Api\PredictionResultController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleLoginController;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\SearchController;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -36,24 +36,22 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth:api');
 Route::get('/me', [LoginController::class, 'me'])->middleware('auth:api');
 
-//google
+// Google 로그인
 Route::post('/auth/google', [GoogleLoginController::class, 'handle']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/results', [ResultController::class, 'index']);
-    Route::get('/results/{id}', [ResultController::class, 'show']);
-    Route::delete('/results/{id}', [ResultController::class, 'destroy']);
+    Route::get('/results', [PredictionResultController::class, 'index']);
+    Route::get('/results/{id}', [PredictionResultController::class, 'show']);
+    Route::delete('/results/{id}', [PredictionResultController::class, 'destroy']);
 
     Route::prefix('predict')->group(function () {
-        Route::post('/', [PredictController::class, 'store']);
-        Route::post('/{id}/opinion', [PredictController::class, 'opinionStore']);
+        Route::post('/', [PredictionController::class, 'store']);
+        Route::post('/{id}/opinion', [PredictionController::class, 'storeOpinion']);
     });
 });
 
 Route::get('/disease-info', [SearchController::class, 'infoApi']);
 Route::get('/diseases', [SearchController::class, 'diseaseListApi']);
-
-
 
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);

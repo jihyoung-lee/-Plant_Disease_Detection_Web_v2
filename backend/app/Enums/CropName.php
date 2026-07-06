@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Enums;
 
 enum CropName: string
@@ -8,7 +9,8 @@ enum CropName: string
     case Peach = 'peach';
     case Potato = 'potato';
     case Strawberry = 'strawberry';
-    public function korean(): string
+
+    public function koreanName(): string
     {
         return match ($this) {
             self::Apple => '사과',
@@ -18,7 +20,8 @@ enum CropName: string
             self::Strawberry => '딸기',
         };
     }
-    public static function values(): array
+
+    public static function codes(): array
     {
         return array_column(self::cases(), 'value');
     }

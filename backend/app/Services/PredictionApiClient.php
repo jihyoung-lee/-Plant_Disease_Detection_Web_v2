@@ -2,38 +2,35 @@
 
 namespace App\Services;
 
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Http;
 use App\DTOs\PredictionApiResponse;
 use App\Exceptions\Prediction\PredictionNetworkException;
 use App\Exceptions\Prediction\PredictionResponseFormatException;
 use App\Exceptions\Prediction\PredictionUpstreamException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 class PredictionApiClient
 {
-    /**
-     * @return PredictionApiResponse
-     */
-    public function predict(UploadedFile $photoFile, string $inputCropName): PredictionApiResponse
+    public function predict(UploadedFile $image, string $cropCode): PredictionApiResponse
     {
-        $modelUrl = config('services.predict.endpoint');
+        $endpoint = config('services.predict.endpoint');
 
-        if (!is_string($modelUrl) || trim($modelUrl) === '') {
+        if (! is_string($endpoint) || trim($endpoint) === '') {
             throw new RuntimeException('AI 분석 서버 주소가 설정되지 않았습니다.');
         }
 
-        $realPath = $photoFile->getRealPath();
+        $imagePath = $image->getRealPath();
 
-        if (!is_string($realPath) || $realPath === '') {
+        if (! is_string($imagePath) || $imagePath === '') {
             throw new RuntimeException('업로드 이미지 경로를 확인할 수 없습니다.');
         }
 
-        $stream = fopen($realPath, 'rb');
+        $imageStream = fopen($imagePath, 'rb');
 
-        if ($stream === false) {
+        if ($imageStream === false) {
             throw new RuntimeException('업로드 이미지를 읽을 수 없습니다.');
         }
 
@@ -43,56 +40,56 @@ class PredictionApiClient
                 ->acceptJson()
                 ->attach(
                     'image',
-                    $stream,
-                    $photoFile->getClientOriginalName(),
-                    ['Content-Type' => $photoFile->getMimeType()]
+                    $imageStream,
+                    $image->getClientOriginalName(),
+                    ['Content-Type' => $image->getMimeType()]
                 )
-                ->post($modelUrl, [
-                    'crop_name' => $inputCropName,
+                ->post($endpoint, [
+                    'crop_name' => $cropCode,
                 ]);
-        } catch (ConnectionException $e) {
+        } catch (ConnectionException $exception) {
             throw new PredictionNetworkException(
                 'AI 분석 서버에 연결할 수 없습니다.',
-                previous: $e
+                previous: $exception
             );
         } finally {
-            fclose($stream);
+            fclose($imageStream);
         }
 
-        $result = $response->json();
+        $responseBody = $response->json();
 
         if ($response->failed()) {
-            throw $this->upstreamException($response, $result);
+            throw $this->createUpstreamException($response, $responseBody);
         }
 
-        if (!is_array($result)) {
+        if (! is_array($responseBody)) {
             throw new PredictionResponseFormatException(
                 'AI 분석 서버가 잘못된 JSON 응답을 반환했습니다.'
             );
         }
 
-        if (!($result['success'] ?? false)) {
-            throw $this->upstreamException($response, $result);
+        if (! ($responseBody['success'] ?? false)) {
+            throw $this->createUpstreamException($response, $responseBody);
         }
 
-        $data = $result['data'] ?? null;
+        $predictionData = $responseBody['data'] ?? null;
 
-        if (!is_array($data)) {
-            throw new PredictionResponseFormatException('AI prediction response data is missing.');
+        if (! is_array($predictionData)) {
+            throw new PredictionResponseFormatException('AI 분석 응답 데이터가 없습니다.');
         }
 
-        $cropName = $data['crop_name'] ?? '';
-        $sickName = $data['sick_name_kor'] ?? '';
-        $confidence = $data['confidence'] ?? null;
+        $cropNameKor = $predictionData['crop_name'] ?? '';
+        $sickNameKor = $predictionData['sick_name_kor'] ?? '';
+        $confidence = $predictionData['confidence'] ?? null;
 
         if (
-            !is_string($cropName)
-            || !is_string($sickName)
-            || !is_numeric($confidence)
-            || trim($cropName) === ''
-            || trim($sickName) === ''
-            || mb_strlen($cropName) > 50
-            || mb_strlen($sickName) > 255
+            ! is_string($cropNameKor)
+            || ! is_string($sickNameKor)
+            || ! is_numeric($confidence)
+            || trim($cropNameKor) === ''
+            || trim($sickNameKor) === ''
+            || mb_strlen($cropNameKor) > 50
+            || mb_strlen($sickNameKor) > 255
             || (float) $confidence < 0
             || (float) $confidence > 100
         ) {
@@ -100,27 +97,29 @@ class PredictionApiClient
         }
 
         return new PredictionApiResponse(
-            cropName: trim($cropName),
-            sickNameKor: trim($sickName),
+            cropNameKor: trim($cropNameKor),
+            sickNameKor: trim($sickNameKor),
             confidence: (float) $confidence,
         );
     }
 
-    private function upstreamException(Response $response, mixed $result): PredictionUpstreamException
-    {
-        $error = is_array($result) && is_array($result['error'] ?? null)
-            ? $result['error']
+    private function createUpstreamException(
+        Response $response,
+        mixed $responseBody,
+    ): PredictionUpstreamException {
+        $error = is_array($responseBody) && is_array($responseBody['error'] ?? null)
+            ? $responseBody['error']
             : [];
 
         $errorCode = $error['code'] ?? null;
         $message = $error['message']
-            ?? (is_array($result) ? ($result['message'] ?? null) : null)
+            ?? (is_array($responseBody) ? ($responseBody['message'] ?? null) : null)
             ?? 'AI 분석 서버가 실패 응답을 반환했습니다.';
 
         return new PredictionUpstreamException(
             status: $response->status(),
             errorCode: is_string($errorCode) ? $errorCode : null,
-            message: is_string($message) ? $message : 'AI 분석 서버 오류'
+            message: is_string($message) ? $message : 'AI 분석 서버 오류',
         );
     }
 }

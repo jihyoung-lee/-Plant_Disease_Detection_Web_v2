@@ -52,13 +52,13 @@ class PredictionApiClient
                         if ($exception instanceof RequestException) {
                             return in_array(
                                 $exception->response?->status(),
-                                [500, 502, 503, 504],
-                                false
+                                [500, 502, 503, 504]
                             );
                         }
 
                         return false;
-                    })
+                    },
+                false)
                 ->attach(
                     'image',
                     $imageContents,

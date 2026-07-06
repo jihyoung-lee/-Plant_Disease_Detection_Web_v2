@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\Prediction\PredictionException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\UserOpinionRequest;
@@ -88,6 +89,8 @@ class PredictController extends Controller
             return response()->json([
                 'error' => '동일한 이미지가 분석 중입니다. 잠시 후 다시 시도해주세요.',
             ], 503);
+        } catch (PredictionException $e) {
+            throw $e;
         } catch (Throwable $e) {
             if ($path) {
                 try {

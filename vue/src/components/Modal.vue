@@ -69,8 +69,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/lib/axios'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const dialogRef = ref(null)
 
 defineExpose({
@@ -92,10 +94,9 @@ const cropOptions = ref([
 ])
 
 function openModal() {
-  const token = localStorage.getItem('token')
-  if (!token) {
+  if (!userStore.isLoggedIn) {
     alert('로그인이 필요합니다.')
-    router.push({ name: 'Login' }) // 로그인 페이지 이름으로 이동
+    router.push({ name: 'Login' })
     return
   }
 

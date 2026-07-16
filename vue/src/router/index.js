@@ -7,6 +7,8 @@ import TrainList from '../components/TrainList.vue'
 import Register from '../components/auth/Register.vue'
 import Login from '@/components/auth/Login.vue'
 import Logout from '@/components/auth/Logout.vue'
+import { useUserStore } from '@/stores/user'
+
 const routes = [
     {
         path: '/',
@@ -56,27 +58,25 @@ const router = createRouter({
     routes,
 })
 
-// 중복 로그인 방지 및 다국어 타이틀 적용, 라우터 가드
-router.beforeEach((to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('token')
+// 쿠키 로그인도 있어서 localStorage 말고 서버 기준으로 확인
+router.beforeEach(async (to) => {
+    const userStore = useUserStore()
+    const isAuthenticated = await userStore.fetchUser()
 
-    // 라우터 가드
-    if (to.meta.requiresAuth && !isAuthenticated) {
-        return next( { name: 'Login' })
-    }
-
-    // guest only
-    if (to.meta.guestOnly && isAuthenticated){
-        return next('/')
-    }
-
-    // 다국어 타이틀 처리
     const titleKey = to.meta.titleKey
     if (titleKey) {
         document.title = i18n.global.t(titleKey)
     }
 
-    next()
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        return { name: 'Login' }
+    }
+
+    if (to.meta.guestOnly && isAuthenticated){
+        return { name: 'Home' }
+    }
+
+    return true
 })
 
 export default router

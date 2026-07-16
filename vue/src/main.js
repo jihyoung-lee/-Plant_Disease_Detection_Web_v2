@@ -18,8 +18,8 @@ if (savedLang) {
 }
 
 createApp(App)
-    .use(router)
     .use(pinia)
+    .use(router)
     .use(i18n)
     .use(GoogleLogin,{
         clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,

@@ -80,11 +80,13 @@
 <script setup>
 import { ref, nextTick, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api, { setAuthToken } from '@/lib/axios'
+import api from '@/lib/axios'
 import { useI18n } from 'vue-i18n'
+import { useUserStore } from '@/stores/user'
 
 const { t } = useI18n()
 const router = useRouter()
+const userStore = useUserStore()
 
 const step = ref(1)
 const form = ref({
@@ -209,8 +211,9 @@ const completeRegistration = async () => {
       password: form.value.password
     })
 
-    if (loginResponse.data.token) {
-      setAuthToken(loginResponse.data.token)
+    const loggedIn = await userStore.completeLogin(loginResponse.data.token)
+    if (!loggedIn) {
+      throw new Error('로그인 상태 확인 실패')
     }
 
     alert('회원가입 완료!')

@@ -25,7 +25,7 @@ const onSuccess = async (res) => {
     const jwt = response.data.token
     const user = response.data.user
 
-    userStore.setUser(user, jwt)  // pinia에 저장
+    await userStore.completeLogin(jwt, user)
     router.push('/')
   } catch (err) {
     console.error('백엔드 로그인 실패:', err.response?.data || err.message)

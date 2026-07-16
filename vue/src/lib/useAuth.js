@@ -1,30 +1,18 @@
-import { ref, onMounted } from 'vue';
-import api from '@/lib/axios';
-
-const user = ref(null);
-const isAuthenticated = ref(false);
+import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
 export function useAuth() {
-    const fetchUser = async () => {
-        try {
-            const response = await api.get('/me');
-            user.value = response.data;
-            isAuthenticated.value = true;
-        } catch (e) {
-            user.value = null;
-            isAuthenticated.value = false;
-        }
-    };
+    const userStore = useUserStore()
+    const { user, isLoggedIn } = storeToRefs(userStore)
 
     onMounted(() => {
-        if (localStorage.getItem('token')) {
-            fetchUser();
-        }
-    });
+        userStore.fetchUser()
+    })
 
     return {
         user,
-        isAuthenticated,
-        fetchUser,
-    };
+        isAuthenticated: isLoggedIn,
+        fetchUser: () => userStore.fetchUser(true),
+    }
 }

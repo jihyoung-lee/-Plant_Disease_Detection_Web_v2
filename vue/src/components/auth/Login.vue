@@ -40,7 +40,7 @@
 import GoogleLogin from "@/components/auth/GoogleLogin.vue"
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api, { setAuthToken } from '@/lib/axios'
+import api from '@/lib/axios'
 import { useUserStore } from '@/stores/user'
 import { useI18n } from 'vue-i18n'
 
@@ -58,13 +58,13 @@ const handleLogin = async () => {
 
   try {
     const res = await api.post('/login', { email: email.value, password: password.value })
-    const token = res.data.token
-    setAuthToken(token)  // axios 헤더 + localStorage 저장
+    const loggedIn = await userStore.completeLogin(res.data.token)
 
-    // 로그인 성공 후
-    userStore.setUser(res.data.user, res.data.token)
+    if (!loggedIn) {
+      throw new Error('로그인 상태 확인 실패')
+    }
 
-    router.push('/list')     // 홈이나 원하는 페이지로 이동
+    router.push('/list')
   } catch (err) {
     error.value = '이메일 또는 비밀번호가 잘못되었습니다.'
   } finally {

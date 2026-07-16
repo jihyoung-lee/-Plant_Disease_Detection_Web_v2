@@ -17,7 +17,7 @@ built as a decoupled Vue and Laravel application.
 
 Plant Disease Detection Web helps users diagnose crop diseases from an uploaded image and explore detailed disease information supplied by Korea's Rural Development Administration. The frontend and backend are completely separated: Vue provides the responsive single-page interface, while Laravel handles authentication, prediction requests, result history, caching, and external API integration.
 
-The current diagnosis flow supports five crops: **potato, strawberry, tomato, peach, and grape**.
+The current diagnosis flow supports five crops: **potato, apple, grape, peach, and strawberry**.
 
 ## Screenshots
 
@@ -38,7 +38,7 @@ The current diagnosis flow supports five crops: **potato, strawberry, tomato, pe
 | Feature | Description |
 | --- | --- |
 | AI image diagnosis | Upload a crop image, select its crop type, and receive the predicted crop, disease, and confidence score. |
-| Supported crops | Diagnose potato, strawberry, tomato, peach, and grape images. |
+| Supported crops | Diagnose `potato`, `apple`, `grape`, `peach`, and `strawberry` images. |
 | Disease guide | Search diseases by crop or disease name and view images, symptoms, development conditions, and prevention methods. |
 | Result history | Review paginated diagnosis results, open related disease information, submit a correction, or delete a result. |
 | Account system | Register with email verification, sign in with JWT credentials, or use Google login. |

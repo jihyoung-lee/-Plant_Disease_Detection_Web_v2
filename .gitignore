@@ -1,2 +1,11 @@
 .env.docker
 .TODO.md
+
+# Codex local agent/config files
+.codex/
+.agents/
+codex-config/
+tasks/
+AGENTS.md
+docs/
+TODO.md

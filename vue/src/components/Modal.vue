@@ -85,10 +85,10 @@ const previewUrl = ref(null)
 const selectedCrop = ref('')
 const cropOptions = ref([
   { label: '감자', value: 'potato' },
-  { label: '딸기', value: 'strawberry' },
-  { label: '토마토', value: 'tomato' },
+  { label: '사과', value: 'apple' },
+  { label: '포도', value: 'grape' },
   { label: '복숭아', value: 'peach' },
-  { label: '포도', value: 'grape' }
+  { label: '딸기', value: 'strawberry' }
 ])
 
 function openModal() {

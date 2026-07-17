@@ -5,7 +5,6 @@ namespace App\Services\Mail;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Throwable;
-use function App\Services\now;
 
 class VerificationService
 {

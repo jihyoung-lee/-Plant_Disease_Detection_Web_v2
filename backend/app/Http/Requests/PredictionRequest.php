@@ -3,9 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Enums\CropName;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class PredictionRequest extends BaseFormRequest
+class PredictionRequest extends FormRequest
 {
     public function authorize(): bool
     {

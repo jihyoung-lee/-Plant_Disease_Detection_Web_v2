@@ -6,6 +6,7 @@ use App\Exceptions\Prediction\PredictionNetworkException;
 use App\Exceptions\Prediction\PredictionResponseFormatException;
 use App\Exceptions\Prediction\PredictionUpstreamException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,6 +38,23 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
+        $this->renderable(function (ValidationException $e, $request) {
+            if (! $request->is('api/*') && ! $request->expectsJson()) {
+                return null;
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => '입력값이 올바르지 않습니다.',
+                'data' => null,
+                'error' => [
+                    'code' => 'VALIDATION_ERROR',
+                    'message' => '입력값이 올바르지 않습니다.',
+                    'details' => $e->errors(),
+                ],
+            ], $e->status);
+        });
+
         $this->renderable(function (PredictionNetworkException $e) {
             return response()->json([
                 'success' => false,
